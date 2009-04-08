@@ -36,6 +36,8 @@ from install_parent import install_parent
 class install_data(_install_data, install_parent):
     user_options = _install_data.user_options
     boolean_options = _install_data.boolean_options
+    
+    NOT_ADD_ROOT = 1
 
     user_options.append(('root=', None,
         'install everything relative to this alternate root directory'))
@@ -140,7 +142,7 @@ class install_data(_install_data, install_parent):
                         ret = "+" + ret
                     self.is_wininst = True
                     return ret
-                dir = self.getDir(str.lower()) + dir[s.end():]
+                dir = self.getDir(str.lower(), install_data.NOT_ADD_ROOT) + dir[s.end():]
         return dir
 
     def initialize_options(self):

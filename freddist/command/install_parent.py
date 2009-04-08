@@ -231,7 +231,7 @@ class install_parent(Command):
             pass
         open(fileSave, 'w').write(body)
 
-    def getDir(self, directory):
+    def getDir(self, directory, no_add_root=None):
         """
         Method returs actual value of some system directory and if needed it
         prepend self.root path (depend on preservepath option).
@@ -242,10 +242,11 @@ class install_parent(Command):
             dir = getattr(self, directory.lower())
         except AttributeError:
             return ''
+        if no_add_root is not None:
+            return dir
         if self.get_actual_root():
             return os.path.join(self.root, dir.lstrip(os.path.sep))
-        else:
-            return dir
+        return dir
 
     def getDir_nop(self, directory):
         """
