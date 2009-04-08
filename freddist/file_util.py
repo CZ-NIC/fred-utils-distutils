@@ -11,9 +11,9 @@ EXCLUDE_PATTERN = ['.*']
 # and include all other
 INCLUDE_PATTERN = ['*']
 
-def curdir(path):
-    """Return directory where setup.py file is situated."""
-    return os.path.join(os.path.dirname(sys.argv[0]), path)
+#def curdir(path):
+#    """Return directory where setup.py file is situated."""
+#    return os.path.join(os.path.dirname(sys.argv[0]), path)
 
 def fit_pattern(filename, excludePattern):
     """Return True if filename fit `excludePattern', otherwise False"""
@@ -188,30 +188,27 @@ def all_files_in_2(directory, excludePattern=None, includePattern=None,
                 includePattern, recursive, onlyFilenames, cutSlashes))
     return paths
 
-def all_subpackages_in(package, excludePattern=None, includePattern=None):
+
+def all_subpackages_in(folder):
     'Returns all subpackages (packages in subdirectories) (recursive)'
     subpackages = []
-
-    if not excludePattern:
-        try:
-            excludePattern = EXCLUDE_PATTERN
-        except NameError:
-            excludePattern = ['']
-    if not includePattern:
-        try:
-            includePattern = INCLUDE_PATTERN
-        except NameError:
-            includePattern = ['*']
-    
-    for filename in os.listdir(curdir(package)):
-        if fit_pattern(filename, excludePattern):
-            continue
-        if not fit_pattern(filename, includePattern):
-            continue
-        full_path = os.path.join(package, filename)
-        if os.path.isdir(curdir(full_path)):
-            subpackages.append(full_path.replace('/', '.'))
-            subpackages.extend(all_subpackages_in(full_path))
-
+    for filename in os.listdir(folder):
+        path = os.path.join(folder, filename)
+        if os.path.isdir(path) and filename[0] != ".":
+            # walk throught subdolder (omit .hidden-folders)
+            subpackages.extend(all_subpackages_in(path))
+        else:
+            if filename == '__init__.py':
+                # join python package into list
+                if filename not in subpackages:
+                    subpackages.append(folder.lstrip('./').replace('/', '.').rstrip('.'))
     return subpackages
+
+
+if __name__ == '__main__':
+    # test function all_subpackages_in()
+    if len(sys.argv) > 1:
+        print all_subpackages_in(sys.argv[1])
+    else:
+        print 'Test function all_subpackages_in()\nUsage: python file_util.py folder'
 
