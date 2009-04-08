@@ -1,15 +1,14 @@
-from distutils.debug import DEBUG
-from distutils.command.bdist_wininst import bdist_wininst as _bdist_wininst
-
 import sys, os, string
 from types import *
-from distutils import log
 
+from distutils.debug import DEBUG
+from distutils.command.bdist_wininst import bdist_wininst as _bdist_wininst
+from distutils import log
 from distutils.util import get_platform
 from distutils.dir_util import create_tree, remove_tree
-from distutils.errors import *
-from distutils.sysconfig import get_python_version
-from distutils.sysconfig import get_python_lib
+from distutils.errors import DistutilsOptionError, DistutilsPlatformError
+from distutils.sysconfig import get_python_version, get_python_lib
+
 from install_parent import install_parent
 
 class bdist_wininst(_bdist_wininst, install_parent):

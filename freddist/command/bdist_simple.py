@@ -1,10 +1,12 @@
-import os
-from distutils.core import Command
-
 import sys, os, string
+
+from distutils.core import Command
 from distutils import log
+from distutils.errors import DistutilsPlatformError
+
 import tempfile
 import shutil
+
 
 class bdist_simple(Command):
     rand_dir = None

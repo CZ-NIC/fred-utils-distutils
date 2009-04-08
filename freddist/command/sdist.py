@@ -1,4 +1,4 @@
-import os, types, sys
+import os, types, sys, string
 from glob import glob
 from distutils import dep_util, log, dir_util
 from distutils.text_file import TextFile
@@ -139,7 +139,7 @@ class sdist(_sdist):
             files = filter(os.path.isfile, glob(pattern))
             if files:
                 self.filelist.extend(files)
-
+        
         if self.distribution.has_pure_modules():
             build_py = self.get_finalized_command('build_py')
             self.filelist.extend(build_py.get_source_files())

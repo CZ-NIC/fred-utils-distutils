@@ -1,11 +1,12 @@
-import os
+import sys, os, string
+
 from distutils.debug import DEBUG
 from distutils.command.bdist_rpm import bdist_rpm as _bdist_rpm
-
-import sys, os, string
-from types import *
+from distutils.errors import DistutilsPlatformError, DistutilsOptionError
 from distutils.file_util import write_file
 from distutils import log
+
+from types import *
 
 # bdist_rpm notes:
 #
