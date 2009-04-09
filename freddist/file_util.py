@@ -3,7 +3,7 @@ freddist.file_util
 Utility function for operating on files
 """
 
-import os, sys, fnmatch
+import os, sys, fnmatch, sets
 from distutils.file_util import *
 
 # by default exclude hidden files/directories
@@ -189,19 +189,27 @@ def all_files_in_2(directory, excludePattern=None, includePattern=None,
     return paths
 
 
-def all_subpackages_in(folder):
+def all_subpackages_in(folder, omit_name = 'build'):
     'Returns all subpackages (packages in subdirectories) (recursive)'
-    subpackages = []
+    subpackages = sets.Set()
+    
+    name = folder.replace(os.path.sep, '.').strip('.')
+    if name == omit_name:
+        # omit build folder, the name of folder could be changed by --bdist-base (-b)
+        return subpackages
+    
     for filename in os.listdir(folder):
         path = os.path.join(folder, filename)
         if os.path.isdir(path) and filename[0] != ".":
             # walk throught subdolder (omit .hidden-folders)
-            subpackages.extend(all_subpackages_in(path))
+            subpackages.update(all_subpackages_in(path))
         else:
+            # join only packages
             if filename == '__init__.py':
                 # join python package into list
-                if filename not in subpackages:
-                    subpackages.append(folder.lstrip('./').replace('/', '.').rstrip('.'))
+                name = folder.replace(os.path.sep, '.').strip('.')
+                if name: # name might be empty after stripping
+                    subpackages.add(name)
     return subpackages
 
 
