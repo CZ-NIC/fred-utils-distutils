@@ -9,6 +9,15 @@ sys.path.append('..')
 from freddist.filelist import FileList
 
 class sdist(_sdist):
+
+    user_options = _sdist.user_options
+    user_options.append(('create-manifest-in', None, 'Create file MANIFEST.in'))
+    boolean_options = ['create-manifest-in']
+
+    def initialize_options(self):
+        _sdist.initialize_options(self)
+        self.create_manifest_in = False
+    
     def finalize_options(self):
         self.srcdir = self.distribution.srcdir
         _sdist.finalize_options(self)
@@ -264,6 +273,32 @@ class sdist(_sdist):
         self.distribution.metadata.write_pkg_info(base_dir)
     # make_release_tree ()
 
+
+    def generate_manifest_in(self, initial=None):
+        "This function generage file MANIFEST.in from distribution.data_files array."
+        
+        manifest = ['# created by:$ python setup.py sdist --create-manifest-in']
+        
+        # include individual variables
+        if isinstance(initial, list) or isinstance(initial, tuple):
+            manifest.extend(initial)
+        elif isinstance(initial, str):
+            manifest.append(initial)
+        
+        # include folders from distribution.data_files
+        for line in self.distribution.data_files:
+            if len(line[1]):
+                path = os.path.dirname(line[1][0])
+                if path:
+                    manifest.append('include %s/*' % path)
+                else:
+                    manifest.append('include %s' % ' '.join(line[1]))
+        
+        open('MANIFEST.in', 'w').write('\n'.join(manifest))
+        log.info('MANIFEST.in was created.')
+    
+    
+    
     def run(self):
         # 'filelist' contains the list of files that will make up the
         # manifest
@@ -278,10 +313,15 @@ class sdist(_sdist):
         # whatever).  File list is accumulated in 'self.filelist'.
         self.get_file_list()
 
+        # Just create document MANIFEST IN
+        if self.create_manifest_in:
+            self.generate_manifest_in()
+            return
+        
         # If user just wanted us to regenerate the manifest, stop now.
         if self.manifest_only:
             return
-
+        
         # Otherwise, go ahead and create the source distribution tarball,
         # or zipfile, or whatever.
         self.make_distribution()

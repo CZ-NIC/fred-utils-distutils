@@ -3,7 +3,7 @@ freddist.file_util
 Utility function for operating on files
 """
 
-import os, sys, fnmatch, sets
+import os, sys, fnmatch, sets, re
 from distutils.file_util import *
 
 # by default exclude hidden files/directories
@@ -211,6 +211,27 @@ def all_subpackages_in(folder, omit_name = 'build'):
                 if name: # name might be empty after stripping
                     subpackages.add(name)
     return subpackages
+
+
+def collect_data_files(data):
+    data_files = []
+    
+    # functions which supports collect filenames in folders
+    is_svn = re.compile('.svn')
+    
+    def collect_folder_files(prefix, folder):
+        for root, dirs, files in os.walk(folder):
+            if is_svn.search(root):
+                continue # omit svn folders
+            # strip backups
+            project_files = [os.path.join(root, name) for name in files if name[-1] != '~']
+            if len(project_files):
+                data_files.append((os.path.join(prefix, root), project_files))
+
+    for prefix, folder in data:
+        collect_folder_files(prefix, folder)
+    return data_files
+
 
 
 if __name__ == '__main__':
