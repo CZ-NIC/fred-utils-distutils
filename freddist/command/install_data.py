@@ -112,7 +112,7 @@ class install_data(_install_data, install_parent):
     dir_patts = ['PREFIX', 'SYSCONFDIR', 'LOCALSTATEDIR', 'LIBEXECDIR',
             'LIBDIR', 'DATAROOTDIR', 'DATADIR', 'MANDIR', 'DOCDIR',
             'INFODIR', 'SBINDIR', 'BINDIR', 'LOCALEDIR', 'PYTHONDIR',
-            'PURELIBDIR', 'APPDIR', 'SRCDIR']
+            'PURELIBDIR', 'APPDIR', 'PUREPYAPPDIR', 'SRCDIR']
 
     def __init__(self, *attrs):
         self.compile = 1

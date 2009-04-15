@@ -76,7 +76,8 @@ class install_parent(Command):
 
     dirs = ['prefix', 'bindir', 'sbindir', 'sysconfdir', 'libexecdir',
             'localstatedir', 'libdir', 'pythondir', 'purelibdir', 'datarootdir',
-            'datadir', 'infodir', 'mandir', 'docdir', 'localedir', 'appdir', 'srcdir']
+            'datadir', 'infodir', 'mandir', 'docdir', 'localedir', 
+            'appdir', 'purepyappdir', 'srcdir']
     # dirs = ['prefix', 'libexecdir', 'localstatedir', 'libdir', 'datarootdir',
             # 'datadir', 'infodir', 'mandir', 'docdir', 'bindir', 'sbindir',
             # 'localedir', 'pythondir', 'purelibdir']
@@ -113,6 +114,7 @@ class install_parent(Command):
         self.datarootdir    = None
         self.datadir        = None
         self.appdir         = None
+        self.purepyappdir   = None
         self.infodir        = None
         self.mandir         = None
         self.docdir         = None
@@ -159,6 +161,8 @@ class install_parent(Command):
             self.datadir = self.datarootdir
         if not self.appdir:
             self.appdir = os.path.join(self.datadir, self.distribution.metadata.name)
+        if not self.purepyappdir:
+            self.purepyappdir = os.path.join(self.purelibdir, self.distribution.metadata.name)
         if not self.infodir:
             self.infodir = os.path.join(self.datarootdir, 'info')
         if not self.mandir:
@@ -200,6 +204,8 @@ class install_parent(Command):
             self.datadir = self.datarootdir
         if not self.appdir:
             self.appdir = os.path.join(self.datadir, self.distribution.metadata.name)
+        if not self.purepyappdir:
+            self.purepyappdir = os.path.join(self.purelibdir, self.distribution.metadata.name)
         if not self.infodir:
             self.infodir = os.path.join(self.datarootdir, 'info')
         if not self.mandir:
