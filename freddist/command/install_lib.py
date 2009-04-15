@@ -97,6 +97,7 @@ class install_lib(_install_lib, install_parent):
                     ('bindir',              'bindir'),
                     ('sbindir',             'sbindir'),
                     ('sysconfdir',          'sysconfdir'),
+                    ('appconfdir',          'appconfdir'),
                     ('libexecdir',          'libexecdir'),
                     ('localstatedir',       'localstatedir'),
                     ('libdir',              'libdir'),

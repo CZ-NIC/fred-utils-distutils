@@ -74,13 +74,11 @@ class install_parent(Command):
     boolean_options.append('no_setupcfg')
     boolean_options.append('replace_path_rel')
 
-    dirs = ['prefix', 'bindir', 'sbindir', 'sysconfdir', 'libexecdir',
+    dirs = ['prefix', 'bindir', 'sbindir', 'sysconfdir', 'appconfdir', 'libexecdir',
             'localstatedir', 'libdir', 'pythondir', 'purelibdir', 'datarootdir',
             'datadir', 'infodir', 'mandir', 'docdir', 'localedir', 
             'appdir', 'purepyappdir', 'srcdir']
-    # dirs = ['prefix', 'libexecdir', 'localstatedir', 'libdir', 'datarootdir',
-            # 'datadir', 'infodir', 'mandir', 'docdir', 'bindir', 'sbindir',
-            # 'localedir', 'pythondir', 'purelibdir']
+
 
     def __init__(self, *attrs):
         self.is_bdist_mode = None
@@ -106,6 +104,7 @@ class install_parent(Command):
         self.bindir         = None
         self.sbindir        = None
         self.sysconfdir     = None
+        self.appconfdir     = None
         self.libexecdir     = None
         self.localstatedir  = None
         self.libdir         = None
@@ -133,88 +132,66 @@ class install_parent(Command):
         self.setupcfg_output    = None
         self.replace_path_rel   = None
 
+
+    def set_option_values(self):
+        "Set values options"
+        if not self.bindir:
+            self.bindir = os.path.join(self.prefix, 'bin')
+        if not self.sbindir:
+            self.sbindir = os.path.join(self.prefix, 'sbin')
+        if self.sysconfdir and not self.appconfdir:
+            self.appconfdir = self.sysconfdir # user defined path for settings
+        if not self.sysconfdir:
+            self.sysconfdir = os.path.join(self.prefix, 'etc')
+        if not self.appconfdir:
+            self.appconfdir = os.path.join(self.sysconfdir, self.distribution.metadata.name)
+        if not self.libexecdir:
+            self.libexecdir = os.path.join(self.prefix, 'libexec')
+        if not self.localstatedir:
+            self.localstatedir = os.path.join(self.prefix, 'var')
+        if not self.libdir:
+            self.libdir = os.path.join(self.prefix, 'lib')
+        if not self.pythondir:
+            self.pythondir = os.path.join(self.libdir, 'python%d.%d' % 
+                    (sys.version_info[0], sys.version_info[1]))
+        if not self.purelibdir:
+            self.purelibdir = os.path.join(self.pythondir, 'site-packages')
+        if not self.datarootdir:
+            self.datarootdir = os.path.join(self.prefix, 'share')
+        if not self.datadir:
+            self.datadir = self.datarootdir
+        if not self.appdir:
+            self.appdir = os.path.join(self.datadir, self.distribution.metadata.name)
+        if not self.purepyappdir:
+            self.purepyappdir = os.path.join(self.purelibdir, self.distribution.metadata.name)
+        if not self.infodir:
+            self.infodir = os.path.join(self.datarootdir, 'info')
+        if not self.mandir:
+            self.mandir = os.path.join(self.datarootdir, 'man')
+        if not self.docdir:
+            self.docdir = os.path.join(
+                    self.datarootdir, 'doc', self.distribution.metadata.name)
+        if not self.localedir:
+            self.localedir = os.path.join(self.datarootdir, 'locale')
+
+
     def finalize_options(self):
         self.srcdir = self.distribution.srcdir
         if not self.prefix:
             # prefix is empty - set it to the default value
             self.prefix = os.path.join('/', 'usr', 'local')
-        if not self.bindir:
-            self.bindir = os.path.join(self.prefix, 'bin')
-        if not self.sbindir:
-            self.sbindir = os.path.join(self.prefix, 'sbin')
-        if not self.sysconfdir:
-            self.sysconfdir = os.path.join(self.prefix, 'etc')
-        if not self.libexecdir:
-            self.libexecdir = os.path.join(self.prefix, 'libexec')
-        if not self.localstatedir:
-            self.localstatedir = os.path.join(self.prefix, 'var')
-        if not self.libdir:
-            self.libdir = os.path.join(self.prefix, 'lib')
-        if not self.pythondir:
-            self.pythondir = os.path.join(self.libdir, 'python%d.%d' % 
-                    (sys.version_info[0], sys.version_info[1]))
-        if not self.purelibdir:
-            self.purelibdir = os.path.join(self.pythondir, 'site-packages')
-        if not self.datarootdir:
-            self.datarootdir = os.path.join(self.prefix, 'share')
-        if not self.datadir:
-            self.datadir = self.datarootdir
-        if not self.appdir:
-            self.appdir = os.path.join(self.datadir, self.distribution.metadata.name)
-        if not self.purepyappdir:
-            self.purepyappdir = os.path.join(self.purelibdir, self.distribution.metadata.name)
-        if not self.infodir:
-            self.infodir = os.path.join(self.datarootdir, 'info')
-        if not self.mandir:
-            self.mandir = os.path.join(self.datarootdir, 'man')
-        if not self.docdir:
-            self.docdir = os.path.join(
-                    self.datarootdir, 'doc', self.distribution.metadata.name)
-        if not self.localedir:
-            self.localedir = os.path.join(self.datarootdir, 'locale')
+        self.set_option_values()
         if not self.setupcfg_template:
             self.setupcfg_template = 'setup.cfg.template'
         if not self.setupcfg_output:
             self.setupcfg_output = 'setup.cfg'
 
+
     def set_directories(self, prefix=None):
         if prefix:
             self.prefix = prefix
+        self.set_option_values()
 
-        if not self.bindir:
-            self.bindir = os.path.join(self.prefix, 'bin')
-        if not self.sbindir:
-            self.sbindir = os.path.join(self.prefix, 'sbin')
-        if not self.sysconfdir:
-            self.sysconfdir = os.path.join(self.prefix, 'etc')
-        if not self.libexecdir:
-            self.libexecdir = os.path.join(self.prefix, 'libexec')
-        if not self.localstatedir:
-            self.localstatedir = os.path.join(self.prefix, 'var')
-        if not self.libdir:
-            self.libdir = os.path.join(self.prefix, 'lib')
-        if not self.pythondir:
-            self.pythondir = os.path.join(self.libdir, 'python%d.%d' % 
-                    (sys.version_info[0], sys.version_info[1]))
-        if not self.purelibdir:
-            self.purelibdir = os.path.join(self.pythondir, 'site-packages')
-        if not self.datarootdir:
-            self.datarootdir = os.path.join(self.prefix, 'share')
-        if not self.datadir:
-            self.datadir = self.datarootdir
-        if not self.appdir:
-            self.appdir = os.path.join(self.datadir, self.distribution.metadata.name)
-        if not self.purepyappdir:
-            self.purepyappdir = os.path.join(self.purelibdir, self.distribution.metadata.name)
-        if not self.infodir:
-            self.infodir = os.path.join(self.datarootdir, 'info')
-        if not self.mandir:
-            self.mandir = os.path.join(self.datarootdir, 'man')
-        if not self.docdir:
-            self.docdir = os.path.join(
-                    self.datarootdir, 'doc', self.distribution.metadata.name)
-        if not self.localedir:
-            self.localedir = os.path.join(self.datarootdir, 'locale')
 
     def replace_pattern(self, fileOpen, fileSave=None, values = []):
         """

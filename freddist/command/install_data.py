@@ -109,7 +109,7 @@ class install_data(_install_data, install_parent):
     boolean_options.append('replace_path_rel')
 
     # directory patterns which install_data recognize
-    dir_patts = ['PREFIX', 'SYSCONFDIR', 'LOCALSTATEDIR', 'LIBEXECDIR',
+    dir_patts = ['PREFIX', 'SYSCONFDIR', 'APPCONFDIR', 'LOCALSTATEDIR', 'LIBEXECDIR',
             'LIBDIR', 'DATAROOTDIR', 'DATADIR', 'MANDIR', 'DOCDIR',
             'INFODIR', 'SBINDIR', 'BINDIR', 'LOCALEDIR', 'PYTHONDIR',
             'PURELIBDIR', 'APPDIR', 'PUREPYAPPDIR', 'SRCDIR']
@@ -138,7 +138,7 @@ class install_data(_install_data, install_parent):
                 if self.is_wininst:
                     self.is_wininst = False
                     ret = os.path.join(self.getDir_noprefix(str.lower()), dir[s.end():].lstrip(os.path.sep))
-                    if str == 'SYSCONFDIR':
+                    if str in ('SYSCONFDIR', 'APPCONFDIR'):
                         ret = "+" + ret
                     self.is_wininst = True
                     return ret
@@ -162,6 +162,7 @@ class install_data(_install_data, install_parent):
                     ('bindir',              'bindir'),
                     ('sbindir',             'sbindir'),
                     ('sysconfdir',          'sysconfdir'),
+                    ('appconfdir',          'appconfdir'),
                     ('libexecdir',          'libexecdir'),
                     ('localstatedir',       'localstatedir'),
                     ('libdir',              'libdir'),
