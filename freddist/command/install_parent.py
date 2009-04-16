@@ -6,8 +6,22 @@ import re, os, sys
 from distutils.cmd import Command
 
 class install_parent(Command):
+
     user_options = []
     boolean_options = []
+    
+    PRESERVEPATH = True # constant for get_root(): self.get_root(self.PRESERVEPATH)
+
+    # Names of variables what will be copied into other classes 
+    # (install_data, install_lib, install_script) by function finalize_options()
+    UNDEFINED_OPTIONS = ('root', 'prefix', 'record', 'bindir', 'sbindir', 
+        'sysconfdir', 'appconfdir', 'libexecdir', 'localstatedir', 'libdir', 
+        'pythondir', 'purelibdir', 'datarootdir', 'datadir', 'infodir', 
+        'mandir', 'docdir', 'preservepath', 'no_record', 'no_pycpyo', 
+        'no_check_deps', 'fgen_setupcfg', 'no_update_setupcfg', 
+        'no_gen_setupcfg', 'no_setupcfg', 'setupcfg_template', 
+        'setupcfg_output', 'replace_path_rel', 'perform_all_install_steps', 
+        'prepare_debian_package')
 
     user_options.append(('bindir=', None,
         'user executables [PREFIX/bin]'))
@@ -63,6 +77,11 @@ class install_parent(Command):
         'output file with setup configuration [setup.cfg]'))
     user_options.append(('replace-path-rel', None,
         'When setup.py replace some path, replace it with relative path'))
+    user_options.append(('perform-all-install-steps', None,
+        'Perform all steps of installation (copy settings file at the destination folder; create database; upload data).'))
+    user_options.append(('prepare-debian-package', None,
+        'Preparation for the debian package - create debian folder and copy files with modified paths'))
+    
 
     boolean_options.append('preservepath')
     boolean_options.append('no_record')
@@ -73,6 +92,9 @@ class install_parent(Command):
     boolean_options.append('no_gen_setupcfg')
     boolean_options.append('no_setupcfg')
     boolean_options.append('replace_path_rel')
+    boolean_options.append('perform_all_install_steps')
+    boolean_options.append('prepare_debian_package')
+
 
     dirs = ['prefix', 'bindir', 'sbindir', 'sysconfdir', 'appconfdir', 'libexecdir',
             'localstatedir', 'libdir', 'pythondir', 'purelibdir', 'datarootdir',
@@ -99,6 +121,17 @@ class install_parent(Command):
         '''
         return ((self.is_bdist_mode or self.preservepath) and [''] or 
                 [type(self.root) is not None and self.root or ''])[0]
+    
+
+    def get_root(self, apply_preservepath=None):
+        "Return aways root except if the parameter apply_preservepath is set."
+        root = ''
+        if self.root is not None:
+            root = self.root
+        if apply_preservepath and (self.is_bdist_mode or self.preservepath):
+            root = '' # reset root
+        return root
+    
 
     def initialize_options(self):
         self.bindir         = None
@@ -131,6 +164,8 @@ class install_parent(Command):
         self.setupcfg_template  = None
         self.setupcfg_output    = None
         self.replace_path_rel   = None
+        self.perform_all_install_steps = None
+        self.prepare_debian_package = None
 
 
     def set_option_values(self):
@@ -319,3 +354,4 @@ class install_parent(Command):
                     record.append(file)
             open(self.record, 'w').writelines(record)
             print "record file has been updated"
+

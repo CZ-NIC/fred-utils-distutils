@@ -174,3 +174,14 @@ class Distribution(_Distribution):
 
         return files
     # find_config_files ()
+
+
+    def _show_help (self, parser, global_options=1, display_options=1, commands=[]):
+        "Join individual messages after default help"
+        _Distribution._show_help(self, parser, global_options, display_options, commands)
+        # display additions
+        for command_class in self.cmdclass.values():
+            if hasattr(command_class, 'show_after_help'):
+                command_class.show_after_help() # must be staticmethod
+
+
