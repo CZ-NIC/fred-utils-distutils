@@ -237,8 +237,13 @@ def set_file_executable(filepath):
     "Set file mode to executable"
     os.chmod(filepath, os.stat(filepath)[stat.ST_MODE] | stat.S_IEXEC | 
              stat.S_IXGRP | stat.S_IXOTH)
-    
-    
+
+
+def get_folder_kb_size(folder):
+    "Returns folder size in kB (as string)."
+    return re.match('\d+', os.popen('du -s %s' % folder).read()).group(0)
+
+
 
 if __name__ == '__main__':
     # test function all_subpackages_in()
