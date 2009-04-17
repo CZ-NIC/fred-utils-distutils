@@ -80,7 +80,8 @@ class install_parent(Command):
     user_options.append(('perform-all-install-steps', None,
         'Perform all steps of installation (copy settings file at the destination folder; create database; upload data).'))
     user_options.append(('prepare-debian-package', None,
-        'Preparation for the debian package - create debian folder and copy files with modified paths'))
+        'Preparation for the debian package - create debian folder and copy files with modified paths.' \
+        ' Automaticly set on these options: --preservepath --no-compile --no-pycpyo'))
     
 
     boolean_options.append('preservepath')
@@ -208,6 +209,12 @@ class install_parent(Command):
                     self.datarootdir, 'doc', self.distribution.metadata.name)
         if not self.localedir:
             self.localedir = os.path.join(self.datarootdir, 'locale')
+        
+        # --prepare-debian-package set on these options automaticly:
+        if self.prepare_debian_package:
+            self.no_compile = True
+            self.no_pycpyo = True
+            self.preservepath = True
 
 
     def finalize_options(self):

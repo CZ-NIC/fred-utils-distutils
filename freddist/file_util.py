@@ -3,7 +3,7 @@ freddist.file_util
 Utility function for operating on files
 """
 
-import os, sys, fnmatch, sets, re
+import os, sys, fnmatch, sets, re, stat
 from distutils.file_util import *
 
 # by default exclude hidden files/directories
@@ -233,6 +233,12 @@ def collect_data_files(data):
     return data_files
 
 
+def set_file_executable(filepath):
+    "Set file mode to executable"
+    os.chmod(filepath, os.stat(filepath)[stat.ST_MODE] | stat.S_IEXEC | 
+             stat.S_IXGRP | stat.S_IXOTH)
+    
+    
 
 if __name__ == '__main__':
     # test function all_subpackages_in()
