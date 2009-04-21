@@ -13,7 +13,7 @@ setup(
         platforms = ['posix'],
         long_description = 'Fred Distutils, utilities for easier way to build packages.',
 
-        packages=['freddist', 'freddist.command'],
+        packages=['freddist', 'freddist.command', 'freddist.nicms'],
         package_data={'freddist': ['freddist/README']},
 
       )

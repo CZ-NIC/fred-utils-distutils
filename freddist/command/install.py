@@ -55,7 +55,8 @@ class install(_install, install_parent):
             
             ):
             self.replace_pattern(src, dest, values)
-            log.info('creating %s' % dest)
+            if log:
+                log.info('creating %s' % dest)
         
         # set privileges to run
         for name in ('postinst', 'postrm'):

@@ -213,7 +213,8 @@ def all_subpackages_in(folder, omit_name = 'build'):
     return subpackages
 
 
-def collect_data_files(data):
+def collect_data_files(data, strip_left_folder=None):
+    "Returns a list of paths and filenames for variable data_files"
     data_files = []
     
     # functions which supports collect filenames in folders
@@ -226,8 +227,12 @@ def collect_data_files(data):
             # strip backups
             project_files = [os.path.join(root, name) for name in files if name[-1] != '~']
             if len(project_files):
+                if strip_left_folder:
+                    # this feature allows join path APP/media/subfolder + media/subfolder ->
+                    # APP/media/subfolder (otherwice APP/media/subfolder/media/subfolder)
+                    root = os.path.join(*root.split('/')[1:])
                 data_files.append((os.path.join(prefix, root), project_files))
-
+    
     for prefix, folder in data:
         collect_folder_files(prefix, folder)
     return data_files
@@ -247,8 +252,19 @@ def get_folder_kb_size(folder):
 
 if __name__ == '__main__':
     # test function all_subpackages_in()
-    if len(sys.argv) > 1:
+    if len(sys.argv) > 2:
+        # test
+        print "all_subpackages_in"
         print all_subpackages_in(sys.argv[1])
+        print '-'*30
+        
+        for suffix in ('', '_2', '_3', '_4'):
+            name = 'all_files_in%s' % suffix
+            print name
+            for item in locals()[name](sys.argv[2], sys.argv[1]):
+                print item
+            print '-'*30
+    
     else:
-        print 'Test function all_subpackages_in()\nUsage: python file_util.py folder'
+        print 'Test functions\nUsage: python file_util.py src/folder dest/folder'
 

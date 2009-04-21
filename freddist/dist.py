@@ -182,6 +182,6 @@ class Distribution(_Distribution):
         # display additions
         for command_class in self.cmdclass.values():
             if hasattr(command_class, 'show_after_help'):
-                command_class.show_after_help() # must be staticmethod
+                command_class.show_after_help(commands) # must be staticmethod
 
 
