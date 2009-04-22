@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 import os
+import re
 import shutil
 from freddist import file_util
 from freddist.command.install import install
@@ -8,6 +9,10 @@ from freddist.command.install import install
 
 
 class NicmsModuleInstall(install):
+    """Install class for Fred NICMS modules. Provides all necessary options,
+    check dependencies, update cron scripts, show individual help and
+    run install process with necessary functions.
+    """
 
     # must be set in descendant
     PROJECT_NAME = None # e.g. 'fred-nicms-payments'
@@ -185,3 +190,33 @@ class NicmsModuleInstall(install):
             print "2. Run script: %s path-to-manage.py" % self.SCRIPT_CREATE_DB
             print command
 
+
+
+
+class NicmsModuleInstallUpdateSettings(NicmsModuleInstall):
+    """Extends NicmsModuleInstall for function what modify paths in
+    settings file.
+    """
+
+    def update_settings(self):
+        "Make path modifications in settings"
+        configname, configname_install = ('settings.py', 'settings.py.install')
+        
+        if not os.path.isfile(configname_install):
+            shutil.copy(configname, configname_install)
+            if self.log:
+                self.log.info('File %s was renamed to %s.' % (configname, 
+                                                     configname_install))
+        
+        body = open(configname_install).read()
+        
+        body = re.sub('BASE_SHARE_DIR\s*=\s*(.+)', 
+                      'BASE_SHARE_DIR = "%s"' % self.share_dir, body, 1)
+        
+        if not os.path.isdir(self.CONFIGURATION_DIR):
+            os.mkdir(self.CONFIGURATION_DIR)
+
+        settings = os.path.join(self.CONFIGURATION_DIR, configname)
+        open(settings, 'w').write(body)
+        if self.log:
+            self.log.info('File %s was updated.' % settings)
