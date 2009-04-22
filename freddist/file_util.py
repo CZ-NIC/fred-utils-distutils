@@ -228,8 +228,8 @@ def collect_data_files(data, strip_left_folder=None):
             project_files = [os.path.join(root, name) for name in files if name[-1] != '~']
             if len(project_files):
                 if strip_left_folder:
-                    # this feature allows join path APP/media/subfolder + media/subfolder ->
-                    # APP/media/subfolder (otherwice APP/media/subfolder/media/subfolder)
+                    # this feature allows join path APP/media/ + media/subfolder ->
+                    # APP/media/subfolder (otherwice APP/media/media/subfolder)
                     root = os.path.join(*root.split('/')[1:])
                 data_files.append((os.path.join(prefix, root), project_files))
     

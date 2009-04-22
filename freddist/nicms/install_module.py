@@ -25,16 +25,23 @@ class NicmsModuleInstall(install):
     # name of base package
     BASE_CMS_NAME = 'fred-nicms'
 
-    BASE_APPS_MODULE_DIR = None  # os.path.join(BASE_CMS_NAME, 'apps', MODULE_NAME)
+    # os.path.join(BASE_CMS_NAME, 'apps', MODULE_NAME)
+    BASE_APPS_MODULE_DIR = None
     log = None
 
+    # folder where is hold settings file modified by setup
+    # it must by same as path in doc/debian/postinst.install
+    CONFIGURATION_DIR = 'configuration'
+    
     
     user_options = install.user_options
-    user_options.append(('fred-nicms=', None, 'fred-nicms path [PURELIBDIR/fred-nicms]'))
+    user_options.append(('fred-nicms=', None, 'fred-nicms path '\
+                                                    '[PURELIBDIR/fred-nicms]'))
     user_options.append(('fred-nicms-conf-filepath=', None, 
         'fred-nicms settings file path [SYSCONFDIR/%s]' % BASE_CONFIG_NAME))
     user_options.append(('fred-nicms-conf-modules-dir=', None, 
-        'fred-nicms settings file path [SYSCONFDIR/%s]' % BASE_CONFIG_MODULE_NAME))
+        'fred-nicms settings file path [SYSCONFDIR/%s]' % 
+                                                    BASE_CONFIG_MODULE_NAME))
 
 
     def initialize_options(self):
@@ -49,7 +56,8 @@ class NicmsModuleInstall(install):
         
         # path to fred-nicms base folder (/usr/share/fred-nicms)
         if self.fred_nicms is None:
-            self.fred_nicms = os.path.join(os.path.split(self.getDir('PUREPYAPPDIR'))[0], self.BASE_CMS_NAME)
+            self.fred_nicms = os.path.join(
+             os.path.split(self.getDir('PUREPYAPPDIR'))[0], self.BASE_CMS_NAME)
 
         # prepare conf_path
         base, folder_name = os.path.split(self.getDir('APPCONFDIR'))
@@ -60,11 +68,14 @@ class NicmsModuleInstall(install):
 
         # path to fred-nicms base settings file (/etc/fred/nicms_cfg.py)
         if self.fred_nicms_conf_filepath is None:
-            self.fred_nicms_conf_filepath = os.path.join(conf_path, self.BASE_CONFIG_NAME)
+            self.fred_nicms_conf_filepath = os.path.join(conf_path, 
+                                                         self.BASE_CONFIG_NAME)
 
-        # path to path to fred-nicms settings modules folder (/etc/fred/nicms_cfg_modules)
+        # path to path to fred-nicms settings modules folder 
+        # (/etc/fred/nicms_cfg_modules)
         if self.fred_nicms_conf_modules_dir is None:
-            self.fred_nicms_conf_modules_dir = os.path.join(conf_path, self.BASE_CONFIG_MODULE_NAME)
+            self.fred_nicms_conf_modules_dir = os.path.join(conf_path, 
+                                                self.BASE_CONFIG_MODULE_NAME)
 
 
     def check_dependencies(self):
@@ -76,6 +87,10 @@ class NicmsModuleInstall(install):
             ):
             if not os.path.isfile(filepath):
                 raise SystemExit, "Error: File %s missing." % filepath
+
+
+    def update_settings(self):
+        "Make any modifications in settings"
 
 
     def update_scritps(self):
@@ -93,8 +108,10 @@ class NicmsModuleInstall(install):
     def show_after_help(commands):
         "Print individual text after default help"
         if len(commands) and issubclass(commands[0], install):
-            print """   or: python setup.py install --localstatedir=/var --prefix=/usr --purelibdir=/usr/share --sysconfdir=/etc/fred --no-check-deps --prepare-debian-package --root=/tmp/package
-"""
+            print '   or: python setup.py install --localstatedir=/var '\
+               '--prefix=/usr --purelibdir=/usr/share --sysconfdir=/etc/fred '\
+               '--no-check-deps --prepare-debian-package --root=/tmp/package'
+
 
 
     def run(self):
@@ -102,13 +119,15 @@ class NicmsModuleInstall(install):
             self.check_dependencies()
 
         # prepare files before move
+        self.update_settings()
         self.update_scritps()
 
         # copy files
         install.run(self)
 
         # remove subsidiary file
-        filepath = os.path.join(self.getDir_nop('DOCDIR'), 'cron.d', 'run.install')
+        filepath = os.path.join(self.getDir_nop('DOCDIR'), 
+                                    'cron.d', 'run.install')
         if os.path.isfile(filepath):
             os.unlink(filepath)
 
@@ -118,17 +137,25 @@ class NicmsModuleInstall(install):
                 ('MODULES_CONF_DIR', self.fred_nicms_conf_modules_dir), 
                 ('BINDIR', self.getDir('BINDIR')), 
                 ('PACKAGE_VERSION', self.PACKAGE_VERSION), 
-                ('INSTALLED_SIZE', file_util.get_folder_kb_size(self.get_root())), 
+                ('INSTALLED_SIZE', file_util.get_folder_kb_size(
+                                                            self.get_root())), 
                 )
             )
             print "Next steps are:"
-            print self.get_info_for_create_package(self.PROJECT_NAME, self.PACKAGE_VERSION)
+            print self.get_info_for_create_package(self.PROJECT_NAME, 
+                                                   self.PACKAGE_VERSION)
             return
 
         # prepare command for create database
-        command = "%s/%s %s" % (self.getDir_nop('BINDIR'), self.SCRIPT_CREATE_DB, self.fred_nicms)
-        src = os.path.join(self.getDir_nop('PURELIBDIR'), self.BASE_APPS_MODULE_DIR, 'settings.py')
-        dest = os.path.join(self.fred_nicms_conf_modules_dir, '%s.py' % self.MODULE_NAME)
+        command = "%s/%s %s" % (self.getDir_nop('BINDIR'), 
+                                self.SCRIPT_CREATE_DB, self.fred_nicms)
+        dest = os.path.join(self.fred_nicms_conf_modules_dir, '%s.py' % 
+                            self.MODULE_NAME)
+        # first try to open a settings modified by setup
+        src = os.path.join(self.CONFIGURATION_DIR, 'settings.py')
+        if not os.path.isfile(src):
+            # if does not exists the modified copy use default
+            src = 'settings.py'
         
         # create database
         if self.perform_all_install_steps:
@@ -139,7 +166,8 @@ class NicmsModuleInstall(install):
             os.system(command) # run create-database
         else:
             print "The remaining steps to complete the installation:"
-            print "(Use --perform-all-install-steps for make all these command in one step)"
+            print "(Use --perform-all-install-steps for make all these "\
+                    "command in one step)"
             print
             print "1. Copy settings file: cp source destination"
             print "cp %s %s" % (src, dest)
