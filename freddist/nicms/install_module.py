@@ -99,9 +99,10 @@ class NicmsModuleInstall(install):
             (os.path.join('cron.d', 'run.install'), 
              os.path.join('cron.d', 'run.txt')), 
             ):
-            self.replace_pattern(src, dest, values)
-            if self.log:
-                self.log.info('File %s was updated.' % dest)
+            if os.path.isfile(src):
+                self.replace_pattern(src, dest, values)
+                if self.log:
+                    self.log.info('File %s was updated.' % dest)
 
 
     @staticmethod
@@ -162,8 +163,9 @@ class NicmsModuleInstall(install):
             # copy settings into destination file
             print "Copy configuration file into", dest
             shutil.copy(src, dest)
-            print "Run command", command
-            os.system(command) # run create-database
+            if self.SCRIPT_CREATE_DB:
+                print "Run command", command
+                os.system(command) # run create-database
         else:
             print "The remaining steps to complete the installation:"
             print "(Use --perform-all-install-steps for make all these "\
