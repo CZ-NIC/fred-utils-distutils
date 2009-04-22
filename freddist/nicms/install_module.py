@@ -76,6 +76,14 @@ class NicmsModuleInstall(install):
         if self.fred_nicms_conf_modules_dir is None:
             self.fred_nicms_conf_modules_dir = os.path.join(conf_path, 
                                                 self.BASE_CONFIG_MODULE_NAME)
+        
+        # can be same as fred_nicms or different:
+        # share_dir:  '/usr/share/fred-nicms'
+        # fred_nicms: '/usr/share/fred-nicms' or 
+        #             '/usr/local/lib/python2.5/site-packages/fred-nicms/'
+        self.share_dir = os.path.join(self.getDir('DATADIR'),
+                                      self.BASE_CMS_NAME)
+
 
 
     def check_dependencies(self):
