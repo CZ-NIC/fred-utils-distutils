@@ -124,7 +124,7 @@ class NicmsModuleInstall(install):
         if len(commands) and issubclass(commands[0], install):
             print '   or: python setup.py install --localstatedir=/var '\
                '--prefix=/usr --purelibdir=/usr/share --sysconfdir=/etc/fred '\
-               '--no-check-deps --prepare-debian-package --root=/tmp/package'
+               '--prepare-debian-package --root=/tmp/package'
 
 
 
@@ -186,9 +186,12 @@ class NicmsModuleInstall(install):
             print
             print "1. Copy settings file: cp source destination"
             print "cp %s %s" % (src, dest)
-            print
-            print "2. Run script: %s path-to-manage.py" % self.SCRIPT_CREATE_DB
-            print command
+            
+            if self.SCRIPT_CREATE_DB:
+                print
+                print "2. Run script: %s path-to-manage.py" % \
+                        self.SCRIPT_CREATE_DB
+                print command
 
 
 

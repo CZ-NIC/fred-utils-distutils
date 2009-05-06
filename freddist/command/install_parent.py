@@ -215,6 +215,7 @@ class install_parent(Command):
             self.no_compile = True
             self.no_pycpyo = True
             self.preservepath = True
+            self.no_check_deps = True
 
 
     def finalize_options(self):
