@@ -363,3 +363,18 @@ class install_parent(Command):
             open(self.record, 'w').writelines(record)
             print "record file has been updated"
 
+    
+    def modify_file(self, command, filename, targetpath):
+        "Modify file if any function is defined."
+        if not hasattr(self.distribution, "modify_files"):
+            return
+        
+        # modify_files: {"command": 
+        #                 (("module.function", ("filename", ...)), ...), ...}
+        for mfncname, files in self.distribution.modify_files.get(command, []):
+            modulename, fncname = mfncname.split(".")
+            fnc = getattr(self.distribution.command_obj[modulename], fncname)
+            for name in files:
+                if re.search("%s$" % name, filename):
+                    # modify file by fnc(SRC, DEST) from SRC to DEST
+                    fnc(filename, os.path.join(targetpath, name))

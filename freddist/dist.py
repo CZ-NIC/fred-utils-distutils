@@ -88,6 +88,9 @@ class Distribution(_Distribution):
         self.rundir = None
         self.requires = None
         
+        # a structure for modification of files:
+        # {"command": (("module.function", ("filename", ...)), ...), ...}
+        self.modify_files = None
 
         self.cmdclass = {}
         _Distribution.__init__(self, attrs)

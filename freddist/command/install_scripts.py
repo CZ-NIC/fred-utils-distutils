@@ -56,6 +56,10 @@ class install_scripts(_install_scripts, install_parent):
                     print "creating optimized %s" % file + 'o'
         if not self.skip_build:
             self.run_command('build_scripts')
-
+        
         _install_scripts.run(self)
-
+        
+        # modify scripts if it is necessary
+        for filepath in self.outfiles:
+            self.modify_file("install_scripts", os.path.join(self.build_dir, 
+                        os.path.basename(filepath)), os.path.dirname(filepath))

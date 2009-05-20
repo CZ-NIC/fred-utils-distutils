@@ -1,5 +1,7 @@
 import string, os
+from types import StringType
 from distutils.command.build_py import build_py as _build_py
+
 
 class build_py(_build_py):
     def finalize_options(self):
@@ -55,6 +57,20 @@ class build_py(_build_py):
                     #FREDDIST line changed
                     return self.srcdir
     #get_package_dir()
+
+
+    def build_module (self, module, module_file, package):
+        "Extend build_module by modification files"
+        # do original function
+        retval = _build_py.build_module(self, module, module_file, package)
+        if type(package) is StringType:
+            package = string.split(package, '.')
+        outfile = self.get_module_outfile(self.build_lib, package, module)
+        # extend by modify file if is defined
+        self.distribution.command_obj["install"].modify_file("build_py", 
+                                        module_file, os.path.dirname(outfile))
+        return retval
+
 
     def run(self):
         _build_py.run(self)

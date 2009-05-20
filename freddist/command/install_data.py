@@ -108,7 +108,7 @@ class install_data(_install_data, install_parent):
         if self.no_pycpyo:
             self.compile = 0
             self.optimize = 0
-
+        
         for f in self.data_files:
             if type(f) is types.StringType:
                 #FREDDIST next line changed
@@ -121,6 +121,7 @@ class install_data(_install_data, install_parent):
                 # it's a simple file, so copy it
                 (out, _) = self.copy_file(f, self.install_dir)
                 self.outfiles.append(out)
+                self.modify_file("install_data", f, self.install_dir)
 
                 if out.endswith('.py') and self.compile == 1:
                     os.system('python -c "import py_compile; \
@@ -159,6 +160,7 @@ class install_data(_install_data, install_parent):
                                     os.path.join(self.srcdir, data))
                         (out, _) = self.copy_file(data, dir)
                         self.outfiles.append(out)
+                        self.modify_file("install_data", data, dir)
                         if 'bin' in out.split(os.path.sep) or\
                                 'sbin' in out.split(os.path.sep) or\
                                 'init.d' in out.split(os.path.sep):

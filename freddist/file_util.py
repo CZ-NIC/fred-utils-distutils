@@ -213,19 +213,28 @@ def all_subpackages_in(folder, omit_name = 'build'):
     return subpackages
 
 
-def collect_data_files(data, strip_left_folder=None):
+def collect_data_files(srcdir, data, strip_left_folder=None):
     "Returns a list of paths and filenames for variable data_files"
     data_files = []
     
     # functions which supports collect filenames in folders
     is_svn = re.compile('.svn')
     
+    # if the path of setup.py is different than the current path
+    # we need strip this part of path
+    strippath = len(srcdir)+1 if len(srcdir) else 0
+    
     def collect_folder_files(prefix, folder):
         for root, dirs, files in os.walk(folder):
             if is_svn.search(root):
                 continue # omit svn folders
+            if strippath:
+                # in case of current path != path/setup.py
+                root = root[strippath:]
+
             # strip backups
-            project_files = [os.path.join(root, name) for name in files if name[-1] != '~']
+            project_files = [os.path.join(root, name) 
+                             for name in files if name[-1] != '~']
             if len(project_files):
                 if strip_left_folder:
                     # this feature allows join path APP/media/ + media/subfolder ->
@@ -234,7 +243,7 @@ def collect_data_files(data, strip_left_folder=None):
                 data_files.append((os.path.join(prefix, root), project_files))
     
     for prefix, folder in data:
-        collect_folder_files(prefix, folder)
+        collect_folder_files(prefix, os.path.join(srcdir, folder))
     return data_files
 
 

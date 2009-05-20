@@ -106,14 +106,15 @@ class NicmsModuleInstall(install):
         "Make any modifications in settings"
 
 
-    def update_scritps(self):
+    def update_scripts(self):
         values = [('MODULE_ROOT', self.fred_nicms)]
         for src, dest in (
             (os.path.join('cron.d', 'run.install'), 
              os.path.join('cron.d', 'run.txt')), 
             ):
             if os.path.isfile(src):
-                self.replace_pattern(src, dest, values)
+                self.replace_pattern(os.path.join(self.srcdir, src), 
+                                     os.path.join(self.srcdir, dest), values)
                 if self.log:
                     self.log.info('File %s was updated.' % dest)
 
@@ -134,7 +135,7 @@ class NicmsModuleInstall(install):
 
         # prepare files before move
         self.update_settings()
-        self.update_scritps()
+        self.update_scripts()
 
         # copy files
         install.run(self)

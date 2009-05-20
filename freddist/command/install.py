@@ -54,7 +54,8 @@ class install(_install, install_parent):
              os.path.join(dest_root, 'control')), 
             
             ):
-            self.replace_pattern(src, dest, values)
+            self.replace_pattern(os.path.join(self.srcdir, src), 
+                                 os.path.join(self.srcdir, dest), values)
             if log:
                 log.info('creating %s' % dest)
         
