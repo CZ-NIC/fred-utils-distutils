@@ -90,7 +90,7 @@ class Distribution(_Distribution):
         
         # a structure for modification of files:
         # {"command": (("module.function", ("filename", ...)), ...), ...}
-        self.modify_files = None
+        self.modify_files = {}
 
         self.cmdclass = {}
         _Distribution.__init__(self, attrs)

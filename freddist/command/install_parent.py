@@ -20,7 +20,7 @@ class install_parent(Command):
         'mandir', 'docdir', 'preservepath', 'no_record', 'no_pycpyo', 
         'no_check_deps', 'fgen_setupcfg', 'no_update_setupcfg', 
         'no_gen_setupcfg', 'no_setupcfg', 'setupcfg_template', 
-        'setupcfg_output', 'replace_path_rel', 'perform_all_install_steps', 
+        'setupcfg_output', 'replace_path_rel', 'after_install', 
         'prepare_debian_package')
 
     user_options.append(('bindir=', None,
@@ -77,8 +77,8 @@ class install_parent(Command):
         'output file with setup configuration [setup.cfg]'))
     user_options.append(('replace-path-rel', None,
         'When setup.py replace some path, replace it with relative path'))
-    user_options.append(('perform-all-install-steps', None,
-        'Perform all steps of installation (copy settings file at the destination folder; create database; upload data).'))
+    user_options.append(('after-install', None,
+        'Do everything required after install (syncdb, loaddata)'))
     user_options.append(('prepare-debian-package', None,
         'Preparation for the debian package - create debian folder and copy files with modified paths.' \
         ' Automaticly set on these options: --preservepath --no-compile --no-pycpyo'))
@@ -93,7 +93,7 @@ class install_parent(Command):
     boolean_options.append('no_gen_setupcfg')
     boolean_options.append('no_setupcfg')
     boolean_options.append('replace_path_rel')
-    boolean_options.append('perform_all_install_steps')
+    boolean_options.append('after_install')
     boolean_options.append('prepare_debian_package')
 
 
@@ -165,7 +165,7 @@ class install_parent(Command):
         self.setupcfg_template  = None
         self.setupcfg_output    = None
         self.replace_path_rel   = None
-        self.perform_all_install_steps = None
+        self.after_install = None
         self.prepare_debian_package = None
 
 
