@@ -38,30 +38,19 @@ class install(_install, install_parent):
 
 
     def make_preparation_for_debian_package(self, log, values):
-        "Prepare folder for debian package. Parameter values is in format (('FROM_PATTERN', 'to-value'), ...)"
-        
-        src_root = os.path.join('doc', 'debian')
+        "Prepare folder for debian package."
+        src_root = os.path.join(self.srcdir, 'doc', 'debian')
         dest_root = os.path.join(self.get_root(), 'DEBIAN')
-        
-        for src, dest in (
-            (os.path.join(src_root, 'postinst.install'), 
-             os.path.join(dest_root, 'postinst')), 
-            
-            (os.path.join(src_root, 'postrm.install'), 
-             os.path.join(dest_root, 'postrm')), 
-
-            (os.path.join(src_root, 'control.install'), 
-             os.path.join(dest_root, 'control')), 
-            
-            ):
-            self.replace_pattern(os.path.join(self.srcdir, src), 
-                                 os.path.join(self.srcdir, dest), values)
-            if log:
-                log.info('creating %s' % dest)
-        
-        # set privileges to run
-        for name in ('postinst', 'postrm'):
-            set_file_executable(os.path.join(dest_root, name))
+        for name in ('control', 'conffiles', 'postinst', 'postrm'):
+            filename = os.path.join(src_root, name)
+            if os.path.isfile(filename):
+                dest = os.path.join(dest_root, name)
+                self.replace_pattern(filename, dest, values)
+                if log:
+                    log.info('creating %s' % dest)
+                # set privileges to run
+                if name in ('postinst', 'postrm'):
+                    set_file_executable(dest)
 
 
     def get_info_for_create_package(self, project_name, package_version):

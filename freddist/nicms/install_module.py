@@ -38,9 +38,7 @@ class NicmsModuleInstall(install):
     user_options.append(('fred-nicms-confdir=', None, 
         'fred-nicms settings file path [SYSCONFDIR/%s]' % 
                                                     BASE_CONFIG_MODULE_NAME))
-
-##    dirs = install.dirs + ['fredconfdir'] # FREDCONFDIR
-
+    
     def initialize_options(self):
         install.initialize_options(self)
         self.fred_nicms = None
@@ -49,14 +47,14 @@ class NicmsModuleInstall(install):
 
     def finalize_options(self):
         install.finalize_options(self)
-        
+
         # path to fred-nicms base folder (/usr/share/fred-nicms)
         if self.fred_nicms is None:
             self.fred_nicms = os.path.join(
-             os.path.split(self.getDir('PUREPYAPPDIR'))[0], self.BASE_CMS_NAME)
+             os.path.split(self.purepyappdir)[0], self.BASE_CMS_NAME)
 
         # prepare conf_path
-        base, folder_name = os.path.split(self.getDir('APPCONFDIR'))
+        base, folder_name = os.path.split(self.appconfdir)
         if folder_name == self.PACKAGE_NAME:
             conf_path = os.path.join(base, self.BASE_CMS_NAME)
         else:
@@ -76,22 +74,33 @@ class NicmsModuleInstall(install):
                                       self.BASE_CMS_NAME)
 
 
-
     def check_dependencies(self):
         'Check some dependencies'
         # check base files
         for filepath in (os.path.join(self.fred_nicms, 'manage.py'), ):
             if not os.path.isfile(filepath):
-                raise SystemExit, "Error: File %s missing." % filepath
+                raise SystemExit, "Error: File %s missing.\nIf you want " \
+                "override this error use --no-check-deps parameter." % filepath
 
 
     def update_settings(self, src, dest):
         "Make any modifications in settings"
 
 
+    def update_data(self, src, dest):
+        "Update file by values"
+        values = [('MODULE_ROOT', self.getDir('PUREPYAPPDIR'))]
+        # it is necessary to join self.srcdir for situation when current dir
+        # is not equal with setup.py dir
+        self.replace_pattern(os.path.join(self.srcdir, src), dest, values)
+        if self.log:
+            log.info('File %s was updated.' % dest)
+
+
     def update_scripts(self, src, dest):
         "Update file by values"
         values = [('MODULE_ROOT', self.fred_nicms)]
+        # here is not self.srcdir by casue src is path from build/scripts-#.#
         self.replace_pattern(src, dest, values)
         if self.log:
             self.log.info('File %s was updated.' % dest)

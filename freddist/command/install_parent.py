@@ -21,7 +21,7 @@ class install_parent(Command):
         'no_check_deps', 'fgen_setupcfg', 'no_update_setupcfg', 
         'no_gen_setupcfg', 'no_setupcfg', 'setupcfg_template', 
         'setupcfg_output', 'replace_path_rel', 'after_install', 
-        'prepare_debian_package')
+        'prepare_debian_package', 'fredconfdir')
 
     user_options.append(('bindir=', None,
         'user executables [PREFIX/bin]'))
@@ -100,7 +100,7 @@ class install_parent(Command):
     dirs = ['prefix', 'bindir', 'sbindir', 'sysconfdir', 'appconfdir', 'libexecdir',
             'localstatedir', 'libdir', 'pythondir', 'purelibdir', 'datarootdir',
             'datadir', 'infodir', 'mandir', 'docdir', 'localedir', 
-            'appdir', 'purepyappdir', 'srcdir']
+            'appdir', 'purepyappdir', 'srcdir', 'fredconfdir']
 
 
     def __init__(self, *attrs):
@@ -152,6 +152,7 @@ class install_parent(Command):
         self.mandir         = None
         self.docdir         = None
         self.localedir      = None
+        self.fredconfdir    = None
 
         self.preservepath   = None
         self.no_record      = None
@@ -209,6 +210,8 @@ class install_parent(Command):
                     self.datarootdir, 'doc', self.distribution.metadata.name)
         if not self.localedir:
             self.localedir = os.path.join(self.datarootdir, 'locale')
+        # if self.fredconfdir is None:
+        #   is defined in freddist.nicms.install_module
         
         # --prepare-debian-package set on these options automaticly:
         if self.prepare_debian_package:
