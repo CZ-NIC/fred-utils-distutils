@@ -77,19 +77,21 @@ class NicmsModuleInstall(install):
     def check_dependencies(self):
         'Check some dependencies'
         # check base files
-        for filepath in (os.path.join(self.fred_nicms, 'manage.py'), ):
+        if self.root:
+            fullpath = os.path.join(self.root, self.fred_nicms.lstrip(os.path.sep))
+        else:
+            fullpath = self.fred_nicms
+            
+        for filepath in (os.path.join(fullpath, 'manage.py'), ):
             if not os.path.isfile(filepath):
                 raise SystemExit, "Error: File %s missing.\nIf you want " \
                 "override this error use --no-check-deps parameter." % filepath
 
 
-    def update_settings(self, src, dest):
-        "Make any modifications in settings"
-
-
     def update_data(self, src, dest):
         "Update file by values"
-        values = [('MODULE_ROOT', self.getDir('PUREPYAPPDIR'))]
+        values = (('MODULE_ROOT', self.fred_nicms), 
+                  ('BASE_SHARE_DIR', self.share_dir))
         # it is necessary to join self.srcdir for situation when current dir
         # is not equal with setup.py dir
         self.replace_pattern(os.path.join(self.srcdir, src), dest, values)
@@ -99,8 +101,17 @@ class NicmsModuleInstall(install):
 
     def update_scripts(self, src, dest):
         "Update file by values"
-        values = [('MODULE_ROOT', self.fred_nicms)]
+        values = (('MODULE_ROOT', self.fred_nicms), 
+                  ('BASE_SHARE_DIR', self.share_dir))
         # here is not self.srcdir by casue src is path from build/scripts-#.#
+        self.replace_pattern(src, dest, values)
+        if self.log:
+            self.log.info('File %s was updated.' % dest)
+
+
+    def update_settings(self, src, dest):
+        values = (('BASE_SHARE_DIR\s*=\s*(.+)', 
+                   'BASE_SHARE_DIR = "%s"' % self.share_dir), )
         self.replace_pattern(src, dest, values)
         if self.log:
             self.log.info('File %s was updated.' % dest)
@@ -108,8 +119,8 @@ class NicmsModuleInstall(install):
 
     def copy_settings(self, src, dest):
         "Create module settings MODULE_NAME from settings.py"
-        self.update_scripts(src, os.path.join(os.path.dirname(src), "%s.py" % 
-                                              self.MODULE_NAME))
+        self.copy_file(src, os.path.join(os.path.dirname(src), 
+                        "%s.py" % self.MODULE_NAME))
 
 
     @staticmethod
@@ -172,20 +183,3 @@ class NicmsModuleInstall(install):
                 print "Run script: %s path-to-manage.py" % \
                         self.SCRIPT_CREATE_DB
                 print command
-
-
-
-
-class NicmsModuleInstallUpdateSettings(NicmsModuleInstall):
-    """Extends NicmsModuleInstall for function what modify paths in
-    settings file.
-    """
-
-    def update_settings(self, src, dest):
-        "Make path modifications in settings"
-        body = open(src).read()
-        body = re.sub('BASE_SHARE_DIR\s*=\s*(.+)', 
-                      'BASE_SHARE_DIR = "%s"' % self.share_dir, body, 1)
-        open(dest, 'w').write(body)
-        if self.log:
-            self.log.info('File %s was updated.' % settings)

@@ -82,6 +82,9 @@ class install_parent(Command):
     user_options.append(('prepare-debian-package', None,
         'Preparation for the debian package - create debian folder and copy files with modified paths.' \
         ' Automaticly set on these options: --preservepath --no-compile --no-pycpyo'))
+#    user_options.append(('fred-distutils-dir=', None,
+#        'Path to freddist (use this parameter if freddist is not installed)'))
+
     
 
     boolean_options.append('preservepath')
@@ -135,6 +138,9 @@ class install_parent(Command):
     
 
     def initialize_options(self):
+        self.prefix         = None
+        self.root           = None
+        
         self.bindir         = None
         self.sbindir        = None
         self.sysconfdir     = None
@@ -168,6 +174,7 @@ class install_parent(Command):
         self.replace_path_rel   = None
         self.after_install = None
         self.prepare_debian_package = None
+#        self.fred_distutils_dir = None
 
 
     def set_option_values(self):
