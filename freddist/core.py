@@ -81,6 +81,7 @@ def setup(**attrs):
     no_gen_setupcfg = False
     no_setupcfg = False
     bdist_rpm = False
+    bdist_deb = False
     no_join_opts = False
     install_extra_opts = None
 
@@ -101,6 +102,8 @@ def setup(**attrs):
         no_setupcfg = True
     if 'bdist_rpm' in sys.argv:
         bdist_rpm = True
+    if 'bdist_deb' in sys.argv:
+        bdist_deb = True
     if '--no-join-opts' in sys.argv:
         no_join_opts = True
 

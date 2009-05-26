@@ -58,6 +58,9 @@ try:
     from freddist.command.bdist_rpm import bdist_rpm
 except ImportError:
     from command.bdist_rpm import bdist_rpm
+
+from freddist.command.bdist_deb import bdist_deb
+
 try:
     from freddist.command.bdist_wininst import bdist_wininst
 except ImportError:
@@ -117,6 +120,8 @@ class Distribution(_Distribution):
             self.cmdclass['bdist'] = bdist
         if not self.cmdclass.get('bdist_rpm'):
             self.cmdclass['bdist_rpm'] = bdist_rpm
+        if not self.cmdclass.get('bdist_deb'):
+            self.cmdclass['bdist_deb'] = bdist_deb
         if not self.cmdclass.get('bdist_wininst'):
             self.cmdclass['bdist_wininst'] = bdist_wininst
         # if not self.cmdclass.get('bdist_dumb'):
@@ -170,11 +175,14 @@ class Distribution(_Distribution):
                 files.append(user_file)
 
         # All platforms support local setup.cfg
-        #FREDDIST added self.srcdir
-        local_file = os.path.join(os.curdir, "setup.cfg")#os.path.join(self.srcdir, "setup.cfg")
-        if os.path.isfile(local_file):
-            files.append(local_file)
-
+        cfg_name = "setup.cfg"
+        if os.path.isfile(cfg_name):
+            # config is in current dir
+            files.append(cfg_name)
+        elif os.path.isfile(os.path.join(self.srcdir, cfg_name)):
+            # confir is inj source dir (where is the setup.py)
+            files.append(os.path.join(self.srcdir, cfg_name))
+        
         return files
     # find_config_files ()
 

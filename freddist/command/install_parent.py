@@ -112,7 +112,7 @@ class install_parent(Command):
 
         for dist in attrs:
             for name in dist.commands:
-                if re.match('bdist', name): #'bdist' or 'bdist_rpm'
+                if re.match('bdist', name): #'bdist' or 'bdist_rpm' or 'bdist_deb'
                     self.is_bdist_mode = 1 #it is bdist mode - creating a package
                     break
             if self.is_bdist_mode:

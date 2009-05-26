@@ -9,6 +9,7 @@ __all__ = [
         'sdist.py',
         'bdist.py',
         'bdist_rpm.py',
+        'bdist_deb.py',
         'clean.py',
         'uninstall.py',
         'install_lib.py',
