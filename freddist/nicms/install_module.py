@@ -151,14 +151,9 @@ class NicmsModuleInstall(install):
                 ('MODULE_ROOT', self.fred_nicms),
                 ('MODULES_CONF_DIR', self.fredconfdir), 
                 ('BINDIR', self.getDir('BINDIR')), 
-                ('PACKAGE_VERSION', self.PACKAGE_VERSION), 
-                ('INSTALLED_SIZE', file_util.get_folder_kb_size(
-                                                            self.get_root())), 
+                ('INSTALLED_SIZE', file_util.get_folder_kb_size(self.get_root())), 
                 )
             )
-            print "Next steps are:"
-            print self.get_info_for_create_package(self.PROJECT_NAME, 
-                                                   self.PACKAGE_VERSION)
             return
 
         # prepare command for create database

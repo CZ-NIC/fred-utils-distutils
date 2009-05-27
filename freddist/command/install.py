@@ -53,16 +53,6 @@ class install(_install, install_parent):
                     set_file_executable(dest)
 
 
-    def get_info_for_create_package(self, project_name, package_version):
-        body = []
-        body.append("cd %s" % self.get_root())
-        body.append('find * -type f|grep -v "^DEBIAN/"|while read x;do md5sum "${x}";done > DEBIAN/md5sums')
-        body.append("cd ..")
-        body.append("dpkg-deb -b %s %s_%s-1~hardy+1_all.deb" % (self.get_root(), project_name, package_version))
-        return '\n'.join(body)
-    
-
-
     def run(self):
         _install.run(self)
         self.normalize_record()
