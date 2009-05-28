@@ -132,6 +132,10 @@ class Distribution(_Distribution):
             self.cmdclass['clean'] = clean
         if not self.cmdclass.get('uninstall'):
             self.cmdclass['uninstall'] = uninstall
+        
+        self.global_options.append(("fred-distutils-dir=", None,
+                                    "Path to freddist module."))
+
 
     def has_srcdir (self):
         return self.srcdir or '.'

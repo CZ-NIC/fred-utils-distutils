@@ -12,9 +12,11 @@ class sdist(_sdist):
 
     user_options = _sdist.user_options
     user_options.append(('create-manifest-in', None, 'Create file MANIFEST.in'))
+    
     boolean_options = ['create-manifest-in']
 
     def initialize_options(self):
+        self.fred_distutils_dir = None
         _sdist.initialize_options(self)
         self.create_manifest_in = False
     
@@ -326,4 +328,46 @@ class sdist(_sdist):
         # or zipfile, or whatever.
         self.make_distribution()
         # _sdist.run(self)
-#class Sdist
+
+
+    def make_distribution (self):
+        """Create the source distribution(s).  First, we create the release
+        tree with 'make_release_tree()'; then, we create all required
+        archive files (according to 'self.formats') from the release tree.
+        Finally, we clean up by blowing away the release tree (unless
+        'self.keep_temp' is true).  The list of archive files created is
+        stored so it can be retrieved later by 'get_archive_files()'.
+        """
+        # Don't warn about missing meta-data here -- should be (and is!)
+        # done elsewhere.
+        base_dir = self.distribution.get_fullname()
+        base_name = os.path.join(self.dist_dir, base_dir)
+##        print "base_dir=", base_dir #!!!!
+##        print "base_name=", base_name #!!!!
+##        base_dir= fred-nicms-vip-1.5.3
+##        base_name= dist/fred-nicms-vip-1.5.3
+
+        self.make_release_tree(base_dir, self.filelist.files)
+##        print "AFTER make_release_tree()" #!!!!
+##        import pdb; pdb.set_trace() #!!!
+        
+        archive_files = []              # remember names of files we create
+        for fmt in self.formats:
+            file = self.make_archive(base_name, fmt, base_dir=base_dir)
+##            print "AFTER make_archive() file=", file #!!!
+##            AFTER make_archive() file= dist/fred-nicms-vip-1.5.3.tar.gz
+            archive_files.append(file)
+            self.distribution.dist_files.append(('sdist', '', file))
+
+        self.archive_files = archive_files
+        
+        # pack freddist module
+        import freddist
+##        dst = os.path.dirname(freddist.__file__)
+##        print "#### dst=", dst #!!!
+        dir_util.copy_tree(os.path.dirname(freddist.__file__), 
+                           os.path.join(base_dir, "freddist"))
+##        print "freddist.__file__=", freddist.__file__ #!!!
+        if not self.keep_temp:
+            dir_util.remove_tree(base_dir, dry_run=self.dry_run)
+

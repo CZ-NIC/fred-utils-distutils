@@ -88,6 +88,8 @@ class bdist_rpm(_bdist_rpm):
         self.no_setupcfg        = None
         self.setupcfg_template  = None
         self.setupcfg_output    = None
+        self.fred_distutils_dir = None
+        
         _bdist_rpm.initialize_options(self)
 
     #FREDDIST new method

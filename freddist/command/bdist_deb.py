@@ -32,6 +32,7 @@ class bdist_deb (Command):
         self.release = None
         self.build_int = None
         self.platform = None
+        self.fred_distutils_dir = None
 
 
     def finalize_options (self):

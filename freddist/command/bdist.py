@@ -70,6 +70,8 @@ class bdist(_bdist):
         self.no_setupcfg        = None
         self.setupcfg_template  = None
         self.setupcfg_output    = None
+        self.fred_distutils_dir = None
+        
         _bdist.initialize_options(self)
 
     def finalize_options(self):
