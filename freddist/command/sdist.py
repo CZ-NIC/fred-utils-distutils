@@ -342,20 +342,12 @@ class sdist(_sdist):
         # done elsewhere.
         base_dir = self.distribution.get_fullname()
         base_name = os.path.join(self.dist_dir, base_dir)
-##        print "base_dir=", base_dir #!!!!
-##        print "base_name=", base_name #!!!!
-##        base_dir= fred-nicms-vip-1.5.3
-##        base_name= dist/fred-nicms-vip-1.5.3
 
         self.make_release_tree(base_dir, self.filelist.files)
-##        print "AFTER make_release_tree()" #!!!!
-##        import pdb; pdb.set_trace() #!!!
         
         archive_files = []              # remember names of files we create
         for fmt in self.formats:
             file = self.make_archive(base_name, fmt, base_dir=base_dir)
-##            print "AFTER make_archive() file=", file #!!!
-##            AFTER make_archive() file= dist/fred-nicms-vip-1.5.3.tar.gz
             archive_files.append(file)
             self.distribution.dist_files.append(('sdist', '', file))
 
@@ -363,11 +355,9 @@ class sdist(_sdist):
         
         # pack freddist module
         import freddist
-##        dst = os.path.dirname(freddist.__file__)
-##        print "#### dst=", dst #!!!
         dir_util.copy_tree(os.path.dirname(freddist.__file__), 
                            os.path.join(base_dir, "freddist"))
-##        print "freddist.__file__=", freddist.__file__ #!!!
+        
         if not self.keep_temp:
             dir_util.remove_tree(base_dir, dry_run=self.dry_run)
 
