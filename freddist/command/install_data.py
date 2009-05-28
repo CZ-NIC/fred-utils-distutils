@@ -1,4 +1,4 @@
-import types, os, re, sys
+import types, os, re, sys, filecmp
 from distutils import util
 from distutils.command.install_data import install_data as _install_data
 from install_parent import install_parent
@@ -56,6 +56,12 @@ class install_data(_install_data, install_parent):
         self.optimize = 1
         _install_data.__init__(self, *attrs)
         install_parent.__init__(self, *attrs)
+        # cache for names of folders translated from proxy value
+        self.config_dirs = {
+            'APPCONFDIR': None, 
+            'FREDCONFDIR': None, 
+        }
+
 
     def replaceSpecialDir(self, dir):
         """
@@ -69,6 +75,7 @@ class install_data(_install_data, install_parent):
         `/usr/local'. So whole path will be `/usr/local/etc/some_dir').
         Valid patterns are emplaced in self.`dir_patts' variable.
         """
+        keydir = dir
         for str in self.dir_patts:
             s = re.search("^"+str, dir)
             if s:
@@ -80,6 +87,11 @@ class install_data(_install_data, install_parent):
                     self.is_wininst = True
                     return ret
                 dir = self.getDir(str.lower(), install_data.NOT_ADD_ROOT) + dir[s.end():]
+        
+        # store translated value of the proxy dir
+        if keydir in self.config_dirs.keys():
+            self.config_dirs[keydir] = dir
+        
         return dir
 
     def initialize_options(self):
@@ -101,6 +113,61 @@ class install_data(_install_data, install_parent):
         self.srcdir = self.distribution.srcdir
         self.rundir = self.distribution.rundir
 
+
+    def dont_overwrite(self, src, dest):
+        "Check if is required the confirmation for overwriting the file"
+        
+        # do NOT use confirmation:
+        
+        if self.distribution.command_obj.get("bdist"):
+            return False # always overwrite file
+        
+        if self.prepare_debian_package:
+            # do not use confirmation during creation the DEB package
+            return False # always overwrite file
+        
+        # rmp calls: python setup.py install -cO2 --root=$RPM_BUILD_ROOT 
+        #                       --record=INSTALLED_FILES --preservepath
+        inst = self.distribution.command_obj.get("install")
+        if inst and inst.preservepath and inst.record == 'INSTALLED_FILES':
+            # do not use confirmation during creation the RMP package
+            return False # always overwrite file
+
+        # USE confirmation:
+        
+        # construct folders where are configuration files stored
+        confpaths = [os.path.join(self.root, path.lstrip(os.path.sep)) 
+                    for path in self.config_dirs.values() if path is not None]
+        configname = os.path.basename(src)
+        if dest in confpaths:
+            # destination is in folder where config files are,
+            # so we check if it is not duplicity
+            destpath = os.path.join(dest, configname)
+            # if file exists and is not same
+            if os.path.isfile(destpath) and not filecmp.cmp(src, destpath):
+                while 1:
+                    print """Configuration file `%s'
+ ==> Since the installation was changed (by you or the script).
+ ==> Distribution offers modified version.
+   What do you do? Possible options are:
+    Y or I : install the package version
+    N or O : keep the current version
+      D    : show the difference between the versions
+    Ctr+Z  : switch this process in the background (return back: 'fg')
+ The default action is to keep the current version.
+*** %s (Y/I/N/O/D/Z) [default=N] ?""" % (destpath, configname), 
+                    answer = raw_input()
+                    if answer == "" or answer in ("n", "N", "o", "O"):
+                        return True # don't overwrite
+                    if answer in ("y", "Y", "i", "I"):
+                        break # overwrite file
+                    if answer in ("d", "D"):
+                        # display difference and
+                        print os.popen("diff %s %s" % (src, destpath)).read()
+        
+        return False # overwrite file
+
+
     def run(self):
         #FREDDIST line added
         self.mkpath(self.install_dir)
@@ -118,6 +185,11 @@ class install_data(_install_data, install_parent):
                     self.warn("setup script did not provide a directory for "
                               "'%s' -- installing right in '%s'" %
                               (f, self.install_dir))
+                
+                # check if the confirmation is required
+                if self.dont_overwrite(f, self.install_dir):
+                    continue
+                
                 # it's a simple file, so copy it
                 (out, _) = self.copy_file(f, self.install_dir)
                 self.outfiles.append(out)
@@ -158,6 +230,11 @@ class install_data(_install_data, install_parent):
                         if not os.path.exists(data):
                             data = util.convert_path(
                                     os.path.join(self.srcdir, data))
+                        
+                        # check if the confirmation is required
+                        if self.dont_overwrite(data, dir):
+                            continue
+                        
                         (out, _) = self.copy_file(data, dir)
                         self.outfiles.append(out)
                         self.modify_file("install_data", data, dir)
