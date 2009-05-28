@@ -136,8 +136,9 @@ class install_data(_install_data, install_parent):
         # USE confirmation:
         
         # construct folders where are configuration files stored
-        confpaths = [os.path.join(self.root, path.lstrip(os.path.sep)) 
-                    for path in self.config_dirs.values() if path is not None]
+        confpaths = [
+            self.root and os.path.join(self.root, path.lstrip(os.path.sep)) 
+            or path for path in self.config_dirs.values() if path is not None]
         configname = os.path.basename(src)
         if dest in confpaths:
             # destination is in folder where config files are,
