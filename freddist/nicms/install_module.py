@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+import sys
 import os
 import re
 import shutil
@@ -72,6 +73,10 @@ class NicmsModuleInstall(install):
         #             '/usr/local/lib/python2.5/site-packages/fred-nicms/'
         self.share_dir = os.path.join(self.getDir('DATADIR'),
                                       self.BASE_CMS_NAME)
+        self.rootappconfdir = self.appconfdir
+        if self.root and not self.preservepath:
+            self.rootappconfdir = os.path.join(self.root, 
+                                        self.appconfdir.lstrip(os.path.sep))
 
 
     def check_dependencies(self):
@@ -91,12 +96,13 @@ class NicmsModuleInstall(install):
     def update_data(self, src, dest):
         "Update file by values"
         values = (('MODULE_ROOT', self.fred_nicms), 
-                  ('BASE_SHARE_DIR', self.share_dir))
+                  ('BASE_SHARE_DIR', self.share_dir), 
+                  ('DIR_ETC_FRED', self.rootappconfdir))
         # it is necessary to join self.srcdir for situation when current dir
         # is not equal with setup.py dir
         self.replace_pattern(os.path.join(self.srcdir, src), dest, values)
         if self.log:
-            log.info('File %s was updated.' % dest)
+            self.log.info('File %s was updated.' % dest)
 
 
     def update_scripts(self, src, dest):
@@ -111,7 +117,10 @@ class NicmsModuleInstall(install):
 
     def update_settings(self, src, dest):
         values = (('BASE_SHARE_DIR\s*=\s*(.+)', 
-                   'BASE_SHARE_DIR = "%s"' % self.share_dir), )
+                   'BASE_SHARE_DIR = "%s"' % self.share_dir), 
+                  ('DIR_ETC_FRED\s*=\s*(.+)', 
+                   'DIR_ETC_FRED = "%s"' % self.rootappconfdir), 
+                 )
         self.replace_pattern(src, dest, values)
         if self.log:
             self.log.info('File %s was updated.' % dest)
@@ -150,6 +159,7 @@ class NicmsModuleInstall(install):
             self.make_preparation_for_debian_package(self.log, (
                 ('MODULE_ROOT', self.fred_nicms),
                 ('MODULES_CONF_DIR', self.fredconfdir), 
+                ('APPCONFDIR', self.appconfdir), 
                 ('BINDIR', self.getDir('BINDIR')), 
                 ('INSTALLED_SIZE', file_util.get_folder_kb_size(self.get_root())), 
                 )
@@ -157,8 +167,12 @@ class NicmsModuleInstall(install):
             return
 
         # prepare command for create database
+        if self.root:
+            fullpath = os.path.join(self.root, self.fred_nicms.lstrip(os.path.sep))
+        else:
+            fullpath = self.fred_nicms
         command = "%s/%s %s" % (self.getDir_nop('BINDIR'), 
-                                self.SCRIPT_CREATE_DB, self.fred_nicms)
+                                self.SCRIPT_CREATE_DB, fullpath)
         dest = os.path.join(self.fredconfdir, '%s.py' % 
                             self.MODULE_NAME)
         
@@ -178,3 +192,5 @@ class NicmsModuleInstall(install):
                 print "Run script: %s path-to-manage.py" % \
                         self.SCRIPT_CREATE_DB
                 print command
+            if hasattr(self, "help_message"):
+                print self.help_message
