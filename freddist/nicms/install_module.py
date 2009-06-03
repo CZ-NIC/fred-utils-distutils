@@ -35,11 +35,9 @@ class NicmsModuleInstall(install):
     
     user_options = install.user_options
     user_options.append(('fred-nicms=', None, 'fred-nicms path '\
-                                                    '[PURELIBDIR/fred-nicms]'))
-    user_options.append(('fred-nicms-confdir=', None, 
-        'fred-nicms settings file path [SYSCONFDIR/%s]' % 
-                                                    BASE_CONFIG_MODULE_NAME))
-    
+                                            '[PURELIBDIR/%s]' % BASE_CMS_NAME))
+
+
     def initialize_options(self):
         install.initialize_options(self)
         self.fred_nicms = None
@@ -137,8 +135,8 @@ class NicmsModuleInstall(install):
         "Print individual text after default help"
         if len(commands) and issubclass(commands[0], install):
             print '   or: python setup.py install --localstatedir=/var '\
-               '--prefix=/usr --purelibdir=/usr/share --sysconfdir=/etc/fred '\
-               '--prepare-debian-package --root=/tmp/package'
+               '--prefix=/usr --purelibdir=/usr/share --sysconfdir=/etc '\
+               '--appconfdir=fred --prepare-debian-package --root=/tmp/package'
 
 
 

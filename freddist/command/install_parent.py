@@ -29,6 +29,8 @@ class install_parent(Command):
         'system admin executables [PREFIX/sbin]'))
     user_options.append(('sysconfdir=', None, 
         'System configuration directory [PREFIX/etc]'))
+    user_options.append(('appconfdir=', None, 
+        'System configuration directory [APPNAME] (sysconfdir/APPNAME)'))
     user_options.append(('libexecdir=', None,
         'Program executables [PREFIX/libexec]'))
     user_options.append(('localstatedir=', None,
@@ -50,7 +52,7 @@ class install_parent(Command):
     user_options.append(('mandir=', None,
         'man documentation [DATAROOTDIR/man]'))
     user_options.append(('docdir=', None,
-        'documentation root [DATAROOTDIR/doc/NAME]'))
+        'documentation root [DATAROOTDIR/doc/APPNAME]'))
     user_options.append(('localedir=', None,
         'locale-dependent data [DATAROOTDIR/locale]'))
 
@@ -180,12 +182,16 @@ class install_parent(Command):
             self.bindir = os.path.join(self.prefix, 'bin')
         if not self.sbindir:
             self.sbindir = os.path.join(self.prefix, 'sbin')
-        if self.sysconfdir and not self.appconfdir:
-            self.appconfdir = self.sysconfdir # user defined path for settings
         if not self.sysconfdir:
             self.sysconfdir = os.path.join(self.prefix, 'etc')
+        
         if not self.appconfdir:
-            self.appconfdir = os.path.join(self.sysconfdir, self.distribution.metadata.name)
+            self.appconfdir = os.path.join(self.sysconfdir, 
+                                           self.distribution.metadata.name)
+        else:
+            if self.appconfdir[0] != "/":
+                self.appconfdir = os.path.join(self.sysconfdir, self.appconfdir)
+        
         if not self.libexecdir:
             self.libexecdir = os.path.join(self.prefix, 'libexec')
         if not self.localstatedir:

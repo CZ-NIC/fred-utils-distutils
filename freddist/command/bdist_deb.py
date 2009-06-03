@@ -22,6 +22,7 @@ class bdist_deb (Command):
         ('release=', None, "Debian release [%s]" % UBUNTU_NAME),
         ('build-int=', None, "Package build int [1]"),
         ('platform=', None, "OS platform [all]"),
+        ('install-extra-opts=', 'i', 'extra option(s) passed to install command'), 
     ]
     
     
@@ -33,6 +34,7 @@ class bdist_deb (Command):
         self.build_int = None
         self.platform = None
         self.fred_distutils_dir = None
+        self.install_extra_opts = None
 
 
     def finalize_options (self):
@@ -68,8 +70,9 @@ class bdist_deb (Command):
         # options --no-compile --no-pycpyo --preservepath --no-check-deps are
         # set automaticly by --prepare-debian-package
         # other options must be set in setup.cfg
-        command = "python %s/setup.py install --prepare-debian-package "\
-                  "--root=%s" % (self.distribution.srcdir, self.bdist_base)
+        ex = "" if self.install_extra_opts is None else self.install_extra_opts
+        command = "python %s/setup.py install %s --prepare-debian-package "\
+                  "--root=%s" % (self.distribution.srcdir, ex, self.bdist_base)
         if not do_command(command):
             return
 
