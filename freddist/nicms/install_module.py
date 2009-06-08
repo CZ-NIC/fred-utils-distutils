@@ -34,36 +34,40 @@ class NicmsModuleInstall(install):
     log = None
     
     user_options = install.user_options
-    user_options.append(('fred-nicms=', None, 'fred-nicms path '\
+    user_options.append(('fredappdir=', None, 'fred-nicms path '\
                                             '[PURELIBDIR/%s]' % BASE_CMS_NAME))
 
 
     def initialize_options(self):
         install.initialize_options(self)
-        self.fred_nicms = None
         self.fredconfdir = None
+        self.fredconfmoduledir = None
+        self.fredappdir  = None
 
 
     def finalize_options(self):
         install.finalize_options(self)
 
         # path to fred-nicms base folder (/usr/share/fred-nicms)
-        if self.fred_nicms is None:
-            self.fred_nicms = os.path.join(
-             os.path.split(self.purepyappdir)[0], self.BASE_CMS_NAME)
-
-        # prepare conf_path
-        base, folder_name = os.path.split(self.appconfdir)
-        if folder_name == self.PACKAGE_NAME:
-            conf_path = os.path.join(base, self.BASE_CMS_NAME)
-        else:
-            conf_path = os.path.join(base, folder_name)
+        if self.fredappdir is None:
+            self.fredappdir = os.path.join(os.path.split(self.purepyappdir)[0], 
+                                           self.BASE_CMS_NAME)
         
         # path to path to fred-nicms settings modules folder 
-        # (/etc/fred/nicms_cfg_modules)
+        # (/etc/fred/)
         if self.fredconfdir is None:
-            self.fredconfdir = os.path.join(conf_path, 
-                                                self.BASE_CONFIG_MODULE_NAME)
+            # prepare conf_path
+            base, folder_name = os.path.split(self.appconfdir)
+            if folder_name == self.PACKAGE_NAME:
+                self.fredconfdir = os.path.join(base, self.BASE_CMS_NAME)
+            else:
+                self.fredconfdir = self.appconfdir
+
+        # path to path to fred-nicms settings modules folder 
+        # (/etc/fred/nicms_cfg_modules)
+        if self.fredconfmoduledir is None:
+            self.fredconfmoduledir = os.path.join(self.fredconfdir, 
+                                                 self.BASE_CONFIG_MODULE_NAME)
         
         # can be same as fred_nicms or different:
         # share_dir:  '/usr/share/fred-nicms'
@@ -72,20 +76,25 @@ class NicmsModuleInstall(install):
         self.share_dir = os.path.join(self.getDir('DATADIR'),
                                       self.BASE_CMS_NAME)
         self.rootappconfdir = self.appconfdir
+        
+        # join root if is required
         if self.root and not self.preservepath:
             self.rootappconfdir = os.path.join(self.root, 
                                         self.appconfdir.lstrip(os.path.sep))
 
 
+    def with_root(self, path):
+        return path if self.root is None \
+                        or self.preservepath \
+                        or self.is_bdist_mode \
+                    else \
+                        os.path.join(self.root, path.lstrip(os.path.sep))
+
+
     def check_dependencies(self):
         'Check some dependencies'
         # check base files
-        if self.root:
-            fullpath = os.path.join(self.root, self.fred_nicms.lstrip(os.path.sep))
-        else:
-            fullpath = self.fred_nicms
-            
-        for filepath in (os.path.join(fullpath, 'manage.py'), ):
+        for filepath in (os.path.join(self.with_root(self.fredappdir), 'manage.py'), ):
             if not os.path.isfile(filepath):
                 raise SystemExit, "Error: File %s missing.\nIf you want " \
                 "override this error use --no-check-deps parameter." % filepath
@@ -93,9 +102,9 @@ class NicmsModuleInstall(install):
 
     def update_data(self, src, dest):
         "Update file by values"
-        values = (('MODULE_ROOT', self.fred_nicms), 
+        values = (('MODULE_ROOT', self.with_root(self.fredappdir)), 
                   ('BASE_SHARE_DIR', self.share_dir), 
-                  ('DIR_ETC_FRED', self.rootappconfdir))
+                  ('DIR_ETC_FRED', self.with_root(self.fredconfdir)))
         # it is necessary to join self.srcdir for situation when current dir
         # is not equal with setup.py dir
         self.replace_pattern(os.path.join(self.srcdir, src), dest, values)
@@ -105,7 +114,7 @@ class NicmsModuleInstall(install):
 
     def update_scripts(self, src, dest):
         "Update file by values"
-        values = (('MODULE_ROOT', self.fred_nicms), 
+        values = (('MODULE_ROOT', self.with_root(self.fredappdir)), 
                   ('BASE_SHARE_DIR', self.share_dir))
         # here is not self.srcdir by casue src is path from build/scripts-#.#
         self.replace_pattern(src, dest, values)
@@ -117,7 +126,7 @@ class NicmsModuleInstall(install):
         values = (('BASE_SHARE_DIR\s*=\s*(.+)', 
                    'BASE_SHARE_DIR = "%s"' % self.share_dir), 
                   ('DIR_ETC_FRED\s*=\s*(.+)', 
-                   'DIR_ETC_FRED = "%s"' % self.rootappconfdir), 
+                   'DIR_ETC_FRED = "%s"' % self.with_root(self.fredconfdir)), 
                  )
         self.replace_pattern(src, dest, values)
         if self.log:
@@ -155,40 +164,32 @@ class NicmsModuleInstall(install):
 
         if self.prepare_debian_package:
             self.make_preparation_for_debian_package(self.log, (
-                ('MODULE_ROOT', self.fred_nicms),
-                ('MODULES_CONF_DIR', self.fredconfdir), 
+                ('MODULE_ROOT', self.fredappdir),
+                ('MODULES_CONF_DIR', self.fredconfmoduledir), 
                 ('APPCONFDIR', self.appconfdir), 
                 ('BINDIR', self.getDir('BINDIR')), 
                 ('INSTALLED_SIZE', file_util.get_folder_kb_size(self.get_root())), 
                 )
             )
             return
-
-        # prepare command for create database
-        if self.root:
-            fullpath = os.path.join(self.root, self.fred_nicms.lstrip(os.path.sep))
-        else:
-            fullpath = self.fred_nicms
-        command = "%s/%s %s" % (self.getDir_nop('BINDIR'), 
-                                self.SCRIPT_CREATE_DB, fullpath)
-        dest = os.path.join(self.fredconfdir, '%s.py' % 
-                            self.MODULE_NAME)
         
-        # create database
-        if self.after_install:
-            # copy settings into destination file
-            if self.SCRIPT_CREATE_DB:
+        if self.SCRIPT_CREATE_DB:
+            # prepare command for create database
+            command = "cd %s; sh %s" % (
+                    os.path.join(self.getDir('FREDAPPDIR'), self.SCRIPTS_DIR), 
+                    self.SCRIPT_CREATE_DB)
+            # create database
+            if self.after_install:
+                # copy settings into destination file
                 print "Run command", command
                 os.system(command) # run create-database
-        else:
-            print "The remaining steps to complete the installation:"
-            print "(Use --after-install for make all these "\
-                    "command in one step)"
-            print
-            if self.SCRIPT_CREATE_DB:
+            else:
+                print "The remaining steps to complete the installation:"
+                print "(Use --after-install for make all these "\
+                      "command in one step)"
                 print
-                print "Run script: %s path-to-manage.py" % \
-                        self.SCRIPT_CREATE_DB
                 print command
-            if hasattr(self, "help_message"):
-                print self.help_message
+                
+        if hasattr(self, "help_message"):
+            print self.help_message
+

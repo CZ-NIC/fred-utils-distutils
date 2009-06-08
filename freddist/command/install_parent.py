@@ -21,7 +21,8 @@ class install_parent(Command):
         'no_check_deps', 'fgen_setupcfg', 'no_update_setupcfg', 
         'no_gen_setupcfg', 'no_setupcfg', 'setupcfg_template', 
         'setupcfg_output', 'replace_path_rel', 'after_install', 
-        'prepare_debian_package', 'fredconfdir')
+        'prepare_debian_package', 'fredconfdir', 'fredconfmoduledir', 
+        'fredappdir')
 
     user_options.append(('bindir=', None,
         'user executables [PREFIX/bin]'))
@@ -102,7 +103,8 @@ class install_parent(Command):
     dirs = ['prefix', 'bindir', 'sbindir', 'sysconfdir', 'appconfdir', 'libexecdir',
             'localstatedir', 'libdir', 'pythondir', 'purelibdir', 'datarootdir',
             'datadir', 'infodir', 'mandir', 'docdir', 'localedir', 
-            'appdir', 'purepyappdir', 'srcdir', 'fredconfdir']
+            'appdir', 'purepyappdir', 'srcdir', 'fredconfdir', 
+            'fredconfmoduledir', 'fredappdir']
 
 
     def __init__(self, *attrs):
@@ -122,8 +124,11 @@ class install_parent(Command):
         Return actual root only in case if the process is not in creation of
         the package
         '''
-        return ((self.is_bdist_mode or self.preservepath) and [''] or 
-                [type(self.root) is not None and self.root or ''])[0]
+        return "" if self.root is None \
+                        or self.preservepath \
+                        or self.is_bdist_mode \
+                  else \
+                        self.root
     
 
     def get_root(self, apply_preservepath=None):
@@ -158,6 +163,8 @@ class install_parent(Command):
         self.docdir         = None
         self.localedir      = None
         self.fredconfdir    = None
+        self.fredconfmoduledir = None
+        self.fredappdir     = None
 
         self.preservepath   = None
         self.no_record      = None
