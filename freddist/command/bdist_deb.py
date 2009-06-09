@@ -39,7 +39,11 @@ class bdist_deb (Command):
 
     def finalize_options (self):
         if not self.bdist_base:
-            self.bdist_base = 'build'
+            self.bdist_base = 'deb'
+        elif self.bdist_base == "build":
+            raise SystemExit("Error --bdist-base: Folder name 'build' is " \
+                             "reserved for building process.")
+        
         # epoch zero is shown empty string "" otherwice "NUMBER:"
         if not self.epoch:
             self.epoch = ''
@@ -79,6 +83,7 @@ class bdist_deb (Command):
         ex = "" if self.install_extra_opts is None else self.install_extra_opts
         command = "python %s/setup.py install %s --prepare-debian-package "\
                   "--root=%s" % (self.distribution.srcdir, ex, self.bdist_base)
+        print "running command:", command
         if not do_command(command):
             return
 
