@@ -5,7 +5,7 @@ import os
 import re
 import shutil
 from freddist import file_util
-from freddist.command.install import install
+from freddist.command.install import install, set_file_executable
 
 
 
@@ -139,6 +139,18 @@ class NicmsModuleInstall(install):
                         "%s.py" % self.MODULE_NAME))
 
 
+    def update_createdb(self, src, dest):
+        "Update file by values"
+        values = (("MANAGEPATH=\${1:-'..'}", 
+                   "MANAGEPATH=${1:-'%s'}" % self.getDir('FREDAPPDIR')), 
+                 )
+        self.replace_pattern(src, dest, values)
+        if self.log:
+            self.log.info('File %s was updated.' % dest)
+        if os.name == 'posix' and not self.dry_run:
+            set_file_executable(dest)
+
+
     @staticmethod
     def show_after_help(commands):
         "Print individual text after default help"
@@ -175,9 +187,12 @@ class NicmsModuleInstall(install):
         
         if self.SCRIPT_CREATE_DB:
             # prepare command for create database
-            command = "cd %s; sh %s" % (
-                    os.path.join(self.getDir('FREDAPPDIR'), self.SCRIPTS_DIR), 
-                    self.SCRIPT_CREATE_DB)
+##            command = "cd %s; sh %s" % (
+##                    os.path.join(self.getDir('FREDAPPDIR'), self.SCRIPTS_DIR), 
+##                    self.SCRIPT_CREATE_DB)
+            command = os.path.join(self.getDir('FREDAPPDIR'), self.SCRIPTS_DIR, 
+                               self.SCRIPT_CREATE_DB)
+
             # create database
             if self.after_install:
                 # copy settings into destination file

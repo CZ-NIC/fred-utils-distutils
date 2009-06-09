@@ -127,12 +127,19 @@ def setup(**attrs):
         return dist
 
     #lets store install-extra-opts from config file (if exists)
-    if bdist_rpm and not no_join_opts:
-        if dist.command_options.has_key('bdist_rpm'):
-            bdist_rpm_val = dist.command_options['bdist_rpm']
-            if bdist_rpm_val.has_key('install_extra_opts'):
-                install_extra_opts = bdist_rpm_val['install_extra_opts'][1]
-
+    key_bdist = None
+    if not no_join_opts:
+        if bdist_rpm:
+            key_bdist = "bdist_rpm"
+        if bdist_deb:
+            key_bdist = "bdist_deb"
+    
+    if key_bdist:
+        if dist.command_options.has_key(key_bdist):
+            bdist_val = dist.command_options[key_bdist]
+            if bdist_val.has_key('install_extra_opts'):
+                install_extra_opts = bdist_val['install_extra_opts'][1]
+    
     # Parse the command line; any command-line errors are the end user's
     # fault, so turn them into SystemExit to suppress tracebacks.
     try:
@@ -147,21 +154,21 @@ def setup(**attrs):
     if _setup_stop_after == "commandline":
         return dist
 
-    #goon only if I create rpm and I want join options (see no_join_opts option)
-    if bdist_rpm and not no_join_opts:
-        #goon only if in setup.cfg is now bdist_rpm part
-        if dist.command_options.has_key('bdist_rpm'):
-            bdist_rpm_val = dist.command_options['bdist_rpm']
-            #goon only if in setup.cfg is install_extra_opts line (under
-            #bdist_rpm paragraph)
-            if bdist_rpm_val.has_key('install_extra_opts'):
-                if bdist_rpm_val['install_extra_opts'][0] == 'command line' and\
+    #go on only if I create rpm or deb and I want join options (see no_join_opts option)
+    if key_bdist:
+        #go on only if in setup.cfg is now bdist_rpm or bdist_deb part
+        if dist.command_options.has_key(key_bdist):
+            bdist_val = dist.command_options[key_bdist]
+            #go on only if in setup.cfg is install_extra_opts line (under
+            #bdist_rpm or bdist_deb paragraph)
+            if bdist_val.has_key('install_extra_opts'):
+                if bdist_val['install_extra_opts'][0] == 'command line' and\
                         install_extra_opts:
-                    dist.command_options['bdist_rpm']['install_extra_opts'] =\
+                    dist.command_options[key_bdist]['install_extra_opts'] =\
                             ('command line', append_option(install_extra_opts,
                                 dist.command_options\
-                                        ['bdist_rpm']['install_extra_opts'][1]))
-
+                                        [key_bdist]['install_extra_opts'][1]))
+    
     if not no_update_setupcfg:
         update_setup_cfg(setupcfg_output, dist.command_options)
     # print "<'))>< thank you for all the fish"

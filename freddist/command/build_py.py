@@ -90,6 +90,18 @@ class build_py(_build_py):
         return retval
 
 
+    def build_package_data (self):
+        """Copy data files into build directory"""
+        lastdir = None
+        for package, src_dir, build_dir, filenames in self.data_files:
+            for filename in filenames:
+                source = os.path.join(src_dir, filename)
+                target = os.path.join(build_dir, filename)
+                self.mkpath(os.path.dirname(target))
+                self.copy_file(source, target, preserve_mode=False)
+                self.modify_file("build_py", source, os.path.dirname(target))
+
+
     def run(self):
         _build_py.run(self)
 

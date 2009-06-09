@@ -77,7 +77,7 @@ class bdist(_bdist):
     def finalize_options(self):
         if not self.build_extra_opts:
             self.build_extra_opts = ''
-
+        
         if not self.install_extra_opts and not self.dontpreservepath:
             self.install_extra_opts = '--preservepath'
         elif self.install_extra_opts and not self.dontpreservepath:
@@ -90,6 +90,7 @@ class bdist(_bdist):
             self.install_extra_opts = ''
 
         _bdist.finalize_options(self)
+
 
     def run(self):
         _bdist.run(self)

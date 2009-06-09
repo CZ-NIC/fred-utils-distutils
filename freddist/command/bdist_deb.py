@@ -53,6 +53,12 @@ class bdist_deb (Command):
             self.build_int = '1'
         if not self.platform:
             self.platform = 'all' # architecture
+        
+        # it is necessary overwrite extra-opts if the command 'bdist' is set
+        if self.distribution.command_options.has_key('bdist'):
+            bdist_val = self.distribution.command_options['bdist']
+            if bdist_val.has_key('install_extra_opts'):
+                self.install_extra_opts = bdist_val['install_extra_opts'][1]   
 
 
     def run (self):
