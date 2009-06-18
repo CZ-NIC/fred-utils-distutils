@@ -31,7 +31,7 @@ class install_parent(Command):
     user_options.append(('sysconfdir=', None, 
         'System configuration directory [PREFIX/etc]'))
     user_options.append(('appconfdir=', None, 
-        'System configuration directory [APPNAME] (sysconfdir/APPNAME)'))
+        'System configuration directory [fred] (sysconfdir/fred)'))
     user_options.append(('libexecdir=', None,
         'Program executables [PREFIX/libexec]'))
     user_options.append(('localstatedir=', None,
@@ -193,8 +193,8 @@ class install_parent(Command):
             self.sysconfdir = os.path.join(self.prefix, 'etc')
         
         if not self.appconfdir:
-            self.appconfdir = os.path.join(self.sysconfdir, 
-                                           self.distribution.metadata.name)
+            # 'fred' or self.distribution.metadata.name
+            self.appconfdir = os.path.join(self.sysconfdir, 'fred')
         else:
             if self.appconfdir[0] != "/":
                 self.appconfdir = os.path.join(self.sysconfdir, self.appconfdir)
