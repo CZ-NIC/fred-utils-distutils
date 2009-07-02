@@ -33,6 +33,9 @@ from install_parent import install_parent
 # All these setting can be overriden by proper options.
 # On line 16 is example of creating empty directory.
 
+is_evend = re.compile("event.d/?$")
+
+
 class install_data(_install_data, install_parent):
 
     user_options = _install_data.user_options + install_parent.user_options
@@ -42,6 +45,10 @@ class install_data(_install_data, install_parent):
         'install everything relative to this alternate root directory'))
     user_options.append(('prefix=', None,
         'installation prefix'))
+    user_options.append(('include-eventd', None,
+        'Include event.d folder in doc folder.'))
+    
+    boolean_options.append('include_eventd')
 
     NOT_ADD_ROOT = 1
 
@@ -102,6 +109,7 @@ class install_data(_install_data, install_parent):
         self.prefix = None
         self.root = None
         self.record = None
+        self.include_eventd = None
 
     def finalize_options(self):
         _install_data.finalize_options(self)
@@ -211,6 +219,12 @@ class install_data(_install_data, install_parent):
             else:
                 # it's a tuple with path to install to and a list of files
                 dir = util.convert_path(self.replaceSpecialDir(f[0]))
+                
+                # do not include folder event.d
+                # if only the option --include-eventd is set
+                if not self.include_eventd and is_evend.search(dir):
+                    continue
+                
                 if not os.path.isabs(dir):
                     if self.is_wininst and dir[0] == '+':
                         dir = os.path.join(self.install_dir[:self.install_dir.rfind(os.path.sep)], dir[1:])

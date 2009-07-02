@@ -238,8 +238,15 @@ def collect_data_files(srcdir, data, strip_left_folder=None):
             if len(project_files):
                 if strip_left_folder:
                     # this feature allows join path APP/media/ + media/subfolder ->
-                    # APP/media/subfolder (otherwice APP/media/media/subfolder)
-                    root = os.path.join(*root.split('/')[1:])
+                    # APP/media/subfolder (otherwise APP/media/media/subfolder)
+                    chops = root.strip('/').split('/')
+                    if len(chops) > 1:
+                        root = os.path.join(*chops[1:])
+                    else:
+                        root = chops[0]
+                    if root == 'doc':
+                        # flatten doc folder (doc/appname/doc/* -> doc/appname/.)
+                        root = ''
                 data_files.append((os.path.join(prefix, root), project_files))
     
     for prefix, folder in data:

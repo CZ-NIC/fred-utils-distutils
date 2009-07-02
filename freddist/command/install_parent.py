@@ -22,7 +22,7 @@ class install_parent(Command):
         'no_gen_setupcfg', 'no_setupcfg', 'setupcfg_template', 
         'setupcfg_output', 'replace_path_rel', 'after_install', 
         'prepare_debian_package', 'fredconfdir', 'fredconfmoduledir', 
-        'fredappdir')
+        'fredappdir', 'include_eventd')
 
     user_options.append(('bindir=', None,
         'user executables [PREFIX/bin]'))
@@ -85,6 +85,8 @@ class install_parent(Command):
     user_options.append(('prepare-debian-package', None,
         'Preparation for the debian package - create debian folder and copy files with modified paths.' \
         ' Automaticly set on these options: --preservepath --no-compile --no-pycpyo'))
+    user_options.append(('include-eventd', None,
+        'Include event.d folder in doc folder.'))
     
     
     boolean_options.append('preservepath')
@@ -98,6 +100,7 @@ class install_parent(Command):
     boolean_options.append('replace_path_rel')
     boolean_options.append('after_install')
     boolean_options.append('prepare_debian_package')
+    boolean_options.append('include_eventd')
 
 
     dirs = ['prefix', 'bindir', 'sbindir', 'sysconfdir', 'appconfdir', 'libexecdir',
@@ -181,6 +184,7 @@ class install_parent(Command):
         self.after_install = None
         self.prepare_debian_package = None
         self.fred_distutils_dir = None
+        self.include_eventd = None
 
 
     def set_option_values(self):
