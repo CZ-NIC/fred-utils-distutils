@@ -157,7 +157,7 @@ class NicmsModuleInstall(install):
         if len(commands) and issubclass(commands[0], install):
             print '   or: python setup.py install --localstatedir=/var '\
                '--prefix=/usr --purelibdir=/usr/share --sysconfdir=/etc '\
-               '--appconfdir=fred --prepare-debian-package --root=/tmp/package'
+               '--prepare-debian-package --root=/tmp/package'
 
 
 
@@ -187,9 +187,6 @@ class NicmsModuleInstall(install):
         
         if self.SCRIPT_CREATE_DB:
             # prepare command for create database
-##            command = "cd %s; sh %s" % (
-##                    os.path.join(self.getDir('FREDAPPDIR'), self.SCRIPTS_DIR), 
-##                    self.SCRIPT_CREATE_DB)
             command = os.path.join(self.getDir('FREDAPPDIR'), self.SCRIPTS_DIR, 
                                self.SCRIPT_CREATE_DB)
 

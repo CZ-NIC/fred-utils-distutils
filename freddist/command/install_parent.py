@@ -22,7 +22,7 @@ class install_parent(Command):
         'no_gen_setupcfg', 'no_setupcfg', 'setupcfg_template', 
         'setupcfg_output', 'replace_path_rel', 'after_install', 
         'prepare_debian_package', 'fredconfdir', 'fredconfmoduledir', 
-        'fredappdir', 'include_eventd')
+        'fredappdir', 'include_eventd', 'include_scripts')
 
     user_options.append(('bindir=', None,
         'user executables [PREFIX/bin]'))
@@ -87,6 +87,8 @@ class install_parent(Command):
         ' Automaticly set on these options: --preservepath --no-compile --no-pycpyo'))
     user_options.append(('include-eventd', None,
         'Include event.d folder in doc folder.'))
+    user_options.append(('include-scripts', None,
+        'Include scripts folder.'))
     
     
     boolean_options.append('preservepath')
@@ -101,6 +103,7 @@ class install_parent(Command):
     boolean_options.append('after_install')
     boolean_options.append('prepare_debian_package')
     boolean_options.append('include_eventd')
+    boolean_options.append('include_scripts')
 
 
     dirs = ['prefix', 'bindir', 'sbindir', 'sysconfdir', 'appconfdir', 'libexecdir',
@@ -185,6 +188,7 @@ class install_parent(Command):
         self.prepare_debian_package = None
         self.fred_distutils_dir = None
         self.include_eventd = None
+        self.include_scripts = None
 
 
     def set_option_values(self):
@@ -240,6 +244,11 @@ class install_parent(Command):
             self.no_pycpyo = True
             self.preservepath = True
             self.no_check_deps = True
+
+        if self.after_install:
+            # scripts must be included if you want run them after installation
+            self.include_scripts = True
+
 
 
     def finalize_options(self):

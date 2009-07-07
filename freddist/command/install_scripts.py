@@ -38,6 +38,9 @@ class install_scripts(_install_scripts, install_parent):
             self.record = 'install.log'
         self.srcdir = self.distribution.srcdir
         self.rundir = self.distribution.rundir
+        # necessary for function get_outputs()
+        self.outfiles = []
+
 
     def run(self):
         self.install_dir = self.getDir_nop('bindir')
@@ -56,7 +59,12 @@ class install_scripts(_install_scripts, install_parent):
                     print "creating optimized %s" % file + 'o'
         if not self.skip_build:
             self.run_command('build_scripts')
-        
+
+        if not self.include_scripts:
+            log.info("Skip install scripts. For install scripts set option: " \
+                     "--include-scripts")
+            return
+
         _install_scripts.run(self)
         
         # modify scripts if it is necessary
