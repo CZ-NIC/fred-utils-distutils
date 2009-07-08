@@ -123,6 +123,9 @@ class NicmsModuleInstall(install):
 
 
     def update_settings(self, src, dest):
+        """Modify settings and copy it into final position
+        This is second step of the installation of settings.
+        """
         values = (('BASE_SHARE_DIR\s*=\s*(.+)', 
                    'BASE_SHARE_DIR = "%s"' % self.share_dir), 
                   ('DIR_ETC_FRED\s*=\s*(.+)', 
@@ -132,14 +135,22 @@ class NicmsModuleInstall(install):
         if self.log:
             self.log.info('File %s was updated.' % dest)
         
-        # remove modified settings (named by app-name)
+        # Remove modified settings file (named along by appname)
+        # This file is created by function copy_settings() and it is necessary
+        # to remove it, otherwise the file stay as an orphan after command 
+        # clean
         os.unlink(src)
         if self.log:
             self.log.info('Remove tmp file %s' % src)
 
 
     def copy_settings(self, src, dest):
-        "Create module settings MODULE_NAME from settings.py"
+        """Create module settings MODULE_NAME from settings.py
+        This is first step of the installation of settings.
+        """
+        # This is exception - the copy goes into SOURCE folder instead of DEST.
+        # The copy is modified and placed into final position by function
+        # update_settings() on the next step of the installation process.
         self.copy_file(src, os.path.join(os.path.dirname(src), 
                         "%s.py" % self.MODULE_NAME))
 
