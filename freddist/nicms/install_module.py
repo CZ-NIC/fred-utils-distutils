@@ -131,6 +131,11 @@ class NicmsModuleInstall(install):
         self.replace_pattern(src, dest, values)
         if self.log:
             self.log.info('File %s was updated.' % dest)
+        
+        # remove modified settings (named by app-name)
+        os.unlink(src)
+        if self.log:
+            self.log.info('Remove tmp file %s' % src)
 
 
     def copy_settings(self, src, dest):
