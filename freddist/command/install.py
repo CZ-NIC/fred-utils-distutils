@@ -24,7 +24,7 @@ class install(_install, install_parent):
     boolean_options = _install.boolean_options + install_parent.boolean_options
 
     DEPS_PYMODULE = None
-    # Format: ('module_name [[attr/function](compare number)]', ...)
+    # Format: ('module_name[ [attr/function](compare number)]', ...)
     # Example:
     # DEPS_PYMODULE = ('django', 'django (>= 1.0)', 'django VERSION(>= 1.0)')
     # Explanation:
@@ -37,7 +37,7 @@ class install(_install, install_parent):
     # Example: ('xsltproc', 'xmllint')
     
     DEPS_HELP = None
-    # Format: { dist: {'module_name': 'package-name'}, ...}
+    # Format: {dist: {'module_name': 'package-name', ...}, ...}
     # Example:
     # DEPS_HELP = {
     #    'rpm': {'django':    'Django', 
@@ -46,7 +46,7 @@ class install(_install, install_parent):
     #            'PIL':       'python-imaging', }}
     
     DEPS_COMMAND_VERSION = None
-    # Format: { module_name: ('compare number', 'shell command'), ... }
+    # Format: {module_name: ('compare number', 'shell command'), ...}
     # Example:
     # DEPS_COMMAND_VERSION = {
     #    'xsltproc': (">= 10122", 
