@@ -24,21 +24,41 @@ class install(_install, install_parent):
     boolean_options = _install.boolean_options + install_parent.boolean_options
 
     DEPS_PYMODULE = None
+    # Format: ('module_name [[attr/function](compare number)]', ...)
+    # Example:
+    # DEPS_PYMODULE = ('django', 'django (>= 1.0)', 'django VERSION(>= 1.0)')
+    # Explanation:
+    #   compare: can be only >, >=, =, ==, <=, <
+    #   attr/function: is module attribute or function returns the version
+    #   value. This value is converted to string and than to LooseVersion obj.
+    
     DEPS_COMMAND = None
+    # Format: (module_name, ...)
+    # Example: ('xsltproc', 'xmllint')
+    
     DEPS_HELP = None
+    # Format: { dist: {'module_name': 'package-name'}, ...}
+    # Example:
+    # DEPS_HELP = {
+    #    'rpm': {'django':    'Django', 
+    #            'PIL':       'PIL', }, 
+    #    'deb': {'django':    'python-django', 
+    #            'PIL':       'python-imaging', }}
+    
+    DEPS_COMMAND_VERSION = None
+    # Format: { module_name: ('compare number', 'shell command'), ... }
+    # Example:
+    # DEPS_COMMAND_VERSION = {
+    #    'xsltproc': (">= 10122", 
+    #                 "xsltproc --version | head -n 1 | awk '{print $5}'"), 
+    #    'xmllint': (">= 20631", 
+    #                "xmllint 2>&1 --version | head -n 1 | awk '{print $NF}'"),
+    #}
+
     DEPS_HELP_COMMAND = {
         'rpm': 'yum install', 
         'deb': 'apt-get install', 
     }
-    DEPS_COMMAND_VERSION = None
-#    # Example of define versions:
-#    DEPS_COMMAND_VERSION = {
-#        'xsltproc': (">= 10122", 
-#                     "xsltproc --version | head -n 1 | awk '{print $5}'"), 
-#        'xmllint': (">= 20631", 
-#                    "xmllint 2>&1 --version | head -n 1 | awk '{print $NF}'"),
-#    }
-
 
     def __init__(self, *attrs):
         "Initialize install object"
