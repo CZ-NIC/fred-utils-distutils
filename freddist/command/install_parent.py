@@ -193,6 +193,12 @@ class install_parent(Command):
 
     def set_option_values(self):
         "Set values options"
+        
+        if self.root and self.prefix and self.prefix[0] != '/':
+            # prefix must start with slash if the root is set
+            # otherwise the prefix is duplicated
+            self.prefix = '/' + self.prefix
+        
         if not self.bindir:
             self.bindir = os.path.join(self.prefix, 'bin')
         if not self.sbindir:
