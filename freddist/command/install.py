@@ -73,8 +73,8 @@ class install(_install, install_parent):
 
     def finalize_options(self):
         "Set defaults of attributes"
-        install_parent.finalize_options(self)
         _install.finalize_options(self)
+        install_parent.finalize_options(self)
         if not self.record and not self.no_record:
             self.record = 'install.log'
 

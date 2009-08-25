@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-from distutils.core import setup
+from freddist.core import setup
 
 setup(
         name='fred-distutils',
@@ -14,7 +14,7 @@ setup(
         long_description = 'Fred Distutils, utilities for easier way to build packages.',
 
         packages=['freddist', 'freddist.command', 'freddist.nicms'],
-        package_data={'freddist': ['freddist/README']},
+        package_data={'freddist': ['README']},
 
       )
 

@@ -5,6 +5,7 @@ Parent class for all install* classes
 import re, os, sys
 from distutils.cmd import Command
 
+
 class install_parent(Command):
 
     user_options = []
@@ -42,7 +43,7 @@ class install_parent(Command):
         'python directory [LIBDIR/python%d.%d]' %
         (sys.version_info[0], sys.version_info[1])))
     user_options.append(('purelibdir=', None,
-        'python pure libraries [LIBDIR/python%d.%d/site-packages]' %
+        'python pure libraries [LIBDIR/python%d.%d/(site-packages or dist-packages)]' %
         (sys.version_info[0], sys.version_info[1])))
     user_options.append(('datarootdir=', None,
         'read only architecture-independent data root [PREFIX/share]'))
@@ -124,6 +125,7 @@ class install_parent(Command):
                     break
             if self.is_bdist_mode:
                 break
+
 
     def get_actual_root(self):
         '''
@@ -223,7 +225,7 @@ class install_parent(Command):
             self.pythondir = os.path.join(self.libdir, 'python%d.%d' % 
                     (sys.version_info[0], sys.version_info[1]))
         if not self.purelibdir:
-            self.purelibdir = os.path.join(self.pythondir, 'site-packages')
+            self.purelibdir = os.path.join(self.pythondir, self.get_site_packages_name())
         if not self.datarootdir:
             self.datarootdir = os.path.join(self.prefix, 'share')
         if not self.datadir:
@@ -255,6 +257,10 @@ class install_parent(Command):
             # scripts must be included if you want run them after installation
             self.include_scripts = True
 
+
+    def get_site_packages_name(self):
+        "Returns actual name 'site_packages' (Can be also 'dist-packages')"
+        return self.install_purelib.split('/')[-1]
 
 
     def finalize_options(self):
