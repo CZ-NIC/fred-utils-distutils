@@ -179,7 +179,11 @@ class NicmsModuleInstall(install):
     @staticmethod
     def show_after_help(commands):
         "Print individual text after default help"
-        if len(commands) and issubclass(commands[0], install):
+        if not len(commands):
+            return
+        import inspect
+        if inspect.isclass(commands[0]) and issubclass(commands[0], install) \
+                                                    or commands[0] == "install":
             print '   or: python setup.py install --localstatedir=/var '\
                '--prefix=/usr --purelibdir=/usr/share --sysconfdir=/etc '\
                '--prepare-debian-package --root=/tmp/package'

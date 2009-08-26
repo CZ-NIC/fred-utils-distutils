@@ -33,7 +33,7 @@ from install_parent import install_parent
 # All these setting can be overriden by proper options.
 # On line 16 is example of creating empty directory.
 
-is_evend = re.compile("event.d/?$")
+is_eventd = re.compile("event.d/?$")
 
 
 class install_data(_install_data, install_parent):
@@ -222,7 +222,7 @@ class install_data(_install_data, install_parent):
                 
                 # do not include folder event.d
                 # if only the option --include-eventd is set
-                if not self.include_eventd and is_evend.search(dir):
+                if not self.include_eventd and is_eventd.search(dir):
                     continue
                 
                 if not os.path.isabs(dir):
