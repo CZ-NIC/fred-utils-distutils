@@ -191,7 +191,7 @@ def all_files_in_2(directory, excludePattern=None, includePattern=None,
 
 def all_subpackages_in(folder, omit_name = 'build'):
     'Returns all subpackages (packages in subdirectories) (recursive)'
-    subpackages = sets()
+    subpackages = set()
     
     name = folder.replace(os.path.sep, '.').strip('.')
     if name == omit_name:
@@ -211,6 +211,15 @@ def all_subpackages_in(folder, omit_name = 'build'):
                 if name: # name might be empty after stripping
                     subpackages.add(name)
     return subpackages
+
+
+def subpackages(root, folder):
+    """Collect names of all modules under the folder.
+    That is used for 'packages' in setup.py
+    """
+    prefixlen = len(root)
+    return [path[prefixlen:] for path in all_subpackages_in(os.path.join(root,
+                                folder.replace('.', os.path.sep)))]
 
 
 def collect_data_files(srcdir, data, strip_left_folder=None):
