@@ -116,7 +116,8 @@ class NicmsModuleInstall(install):
                   ('DIR_ETC_FRED', self.with_root(self.fredconfdir)))
         # it is necessary to join self.srcdir for situation when current dir
         # is not equal with setup.py dir
-        self.replace_pattern(os.path.join(self.srcdir, src), dest, values)
+#        self.replace_pattern(os.path.join(self.srcdir, src), dest, values)
+        self.replace_pattern(src, dest, values)
         if self.log:
             self.log.info('File %s was updated.' % dest)
 
