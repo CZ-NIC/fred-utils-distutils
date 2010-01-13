@@ -117,6 +117,7 @@ class install_parent(Command):
     def __init__(self, *attrs):
         self.is_bdist_mode = None
         self.is_wininst = False
+        self.install_purelib = None     # for pure module distributions
 
         for dist in attrs:
             for name in dist.commands:
@@ -260,6 +261,8 @@ class install_parent(Command):
 
     def get_site_packages_name(self):
         "Returns actual name 'site_packages' (Can be also 'dist-packages')"
+        if self.install_purelib is None:
+            return ''
         return self.install_purelib.split('/')[-1]
 
 
