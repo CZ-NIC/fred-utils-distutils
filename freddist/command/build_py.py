@@ -1,5 +1,5 @@
 import string, os, re
-from types import StringType
+#from types import StringType
 from distutils.command.build_py import build_py as _build_py
 
 
@@ -82,7 +82,8 @@ class build_py(_build_py):
         "Extend build_module by modification files"
         # do original function
         retval = _build_py.build_module(self, module, module_file, package)
-        if type(package) is StringType:
+        #if type(package) is StringType:
+        if isinstance(package, str):
             package = string.split(package, '.')
         outfile = self.get_module_outfile(self.build_lib, package, module)
         # extend by modify file if is defined
