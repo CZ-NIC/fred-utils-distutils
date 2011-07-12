@@ -1,13 +1,13 @@
-import sys, os, string
-from types import *
+#!/usr/bin/env python
+import sys, os
 
-from distutils.debug import DEBUG
 from distutils.command.bdist_wininst import bdist_wininst as _bdist_wininst
 from distutils import log
 from distutils.util import get_platform
-from distutils.dir_util import create_tree, remove_tree
+from distutils.dir_util import remove_tree
 from distutils.errors import DistutilsOptionError, DistutilsPlatformError
 from distutils.sysconfig import get_python_version, get_python_lib
+from distutils.errors import DistutilsFileError
 
 from install_parent import install_parent
 
@@ -160,7 +160,7 @@ class bdist_wininst(_bdist_wininst, install_parent):
         # Use a custom scheme for the zip-file, because we have to decide
         # at installation time which scheme to use.
         for key in ('purelib', 'platlib', 'headers', 'scripts', 'data'):
-            value = string.upper(key)
+            value = key.upper()
             if key == 'headers':
                 value = value + '/Include/$dist_name'
             setattr(install,
@@ -221,9 +221,9 @@ class bdist_wininst(_bdist_wininst, install_parent):
                 bv = get_build_version()
             else:
                 if self.target_version < "2.4":
-                    bv = "6"
+                    bv = 6.0
                 else:
-                    bv = "7.1"
+                    bv = 7.1
         else:
             # for current version - use authoritative check.
             bv = get_build_version()
@@ -232,6 +232,18 @@ class bdist_wininst(_bdist_wininst, install_parent):
         directory = os.path.join(os.path.split(get_python_lib())[0], 'distutils', 'command')
         # we must use a wininst-x.y.exe built with the same C compiler
         # used for python.  XXX What about mingw, borland, and so on?
-        filename = os.path.join(directory, "wininst-%s.exe" % bv)
-        return open(filename, "rb").read()
+
+        # if plat_name starts with "win" but is not "win32"
+        # we want to strip "win" and leave the rest (e.g. -amd64)
+        # for all other cases, we don't want any suffix
+        if self.plat_name != 'win32' and self.plat_name[:3] == 'win':
+            sfix = self.plat_name[3:]
+        else:
+            sfix = ''
+
+        filename = os.path.join(directory, "wininst-%.1f%s.exe" % (bv, sfix))
+        try:
+            return open(filename, "rb").read()
+        except IOError, msg:
+            raise DistutilsFileError, str(msg) + ', please install the python%s-dev package' % sys.version[:3]
 # class bdist_wininst
