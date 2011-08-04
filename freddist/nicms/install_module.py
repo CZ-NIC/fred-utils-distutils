@@ -27,7 +27,7 @@ class NicmsModuleInstall(install):
     SCRIPTS_DIR = 'scripts'
     
     # name of folder for settigns of the dynamic modules
-    BASE_CONFIG_MODULE_NAME = 'nicms_cfg_modules'
+    BASE_CONFIG_MODULE_NAME = 'modules'
     # name of base package
     BASE_CMS_NAME = 'fred-nicms'
 

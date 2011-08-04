@@ -211,7 +211,7 @@ class install_parent(Command):
         
         if not self.appconfdir:
             # 'fred' or self.distribution.metadata.name
-            self.appconfdir = os.path.join(self.sysconfdir, 'fred')
+            self.appconfdir = os.path.join(self.sysconfdir, 'nicms_cfg')
         else:
             if self.appconfdir[0] != "/":
                 self.appconfdir = os.path.join(self.sysconfdir, self.appconfdir)
