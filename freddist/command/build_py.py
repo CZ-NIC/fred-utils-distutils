@@ -1,3 +1,4 @@
+import sys
 import string, os, re
 #from types import StringType
 from distutils.command.build_py import build_py as _build_py
@@ -101,6 +102,18 @@ class build_py(_build_py):
                 self.mkpath(os.path.dirname(target))
                 self.copy_file(source, target, preserve_mode=False)
                 self.modify_file("build_py", source, os.path.dirname(target))
+
+    def byte_compile (self, files):
+        "Compile files *.py and *.po"
+        if sys.dont_write_bytecode:
+            self.warn('byte-compiling is disabled, skipping.')
+            return
+
+        _build_py.byte_compile(self, files)
+
+        if 'no_mo' not in self.distribution.get_option_dict('install'):
+            from freddist.util import pomo_compile
+            pomo_compile(files)
 
 
     def run(self):

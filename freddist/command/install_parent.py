@@ -18,7 +18,7 @@ class install_parent(Command):
     UNDEFINED_OPTIONS = ('root', 'prefix', 'record', 'bindir', 'sbindir', 
         'sysconfdir', 'appconfdir', 'libexecdir', 'localstatedir', 'libdir', 
         'pythondir', 'purelibdir', 'datarootdir', 'datadir', 'infodir', 
-        'mandir', 'docdir', 'preservepath', 'no_record', 'no_pycpyo', 
+        'mandir', 'docdir', 'preservepath', 'no_record', 'no_pycpyo', 'no_mo',
         'no_check_deps', 'fgen_setupcfg', 'no_update_setupcfg', 
         'no_gen_setupcfg', 'no_setupcfg', 'setupcfg_template', 
         'setupcfg_output', 'replace_path_rel', 'after_install', 
@@ -64,6 +64,8 @@ class install_parent(Command):
         'do not record list of installed files'))
     user_options.append(('no-pycpyo', None,
         'do not create compiled pyc and optimized pyo files'))
+    user_options.append(('no-mo', None,
+        'do not create .mo compiled translations from gettext .po files'))
     user_options.append(('no-check-deps', None,
         'do not check dependencies'))
 
@@ -95,6 +97,7 @@ class install_parent(Command):
     boolean_options.append('preservepath')
     boolean_options.append('no_record')
     boolean_options.append('no_pycpyo')
+    boolean_options.append('no_mo')
     boolean_options.append('no_check_deps')
     boolean_options.append('fgen_setupcfg')
     boolean_options.append('no_update_setupcfg')
@@ -178,6 +181,7 @@ class install_parent(Command):
         self.preservepath   = None
         self.no_record      = None
         self.no_pycpyo      = None
+        self.no_mo          = None
         self.no_check_deps  = None
 
         self.fgen_setupcfg      = None
@@ -251,6 +255,7 @@ class install_parent(Command):
         if self.prepare_debian_package:
             self.no_compile = True
             self.no_pycpyo = True
+            self.no_mo = True
             self.preservepath = True
             self.no_check_deps = True
 
