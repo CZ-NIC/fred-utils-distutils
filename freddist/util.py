@@ -8,14 +8,19 @@ import os
 import codecs
 
 from distutils import log
-from distutils.errors import DistutilsByteCompileError
+try:
+    # distutils version 2.6.5
+    from distutils.errors import DistutilsByteCompileError
+except ImportError:
+    # distutils version 2.5.1
+    from distutils.errors import CompileError as DistutilsByteCompileError
 
 
 
 def pomo_compile(files):
     "Compile .po files with gettext translations into .mo"
     # nothing is done if sys.dont_write_bytecode is True
-    if sys.dont_write_bytecode:
+    if hasattr(sys, "dont_write_bytecode") and sys.dont_write_bytecode:
         raise DistutilsByteCompileError('byte-compiling is disabled.')
 
     for filename in files:
