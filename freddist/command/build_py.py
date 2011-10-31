@@ -105,7 +105,7 @@ class build_py(_build_py):
 
     def byte_compile (self, files):
         "Compile files *.py and *.po"
-        if sys.dont_write_bytecode:
+        if hasattr(sys, "dont_write_bytecode") and sys.dont_write_bytecode:
             self.warn('byte-compiling is disabled, skipping.')
             return
 
