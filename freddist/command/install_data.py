@@ -156,6 +156,10 @@ class install_data(_install_data, install_parent):
             destpath = os.path.join(dest, configname)
             # if file exists and is not same
             if os.path.isfile(destpath) and not filecmp.cmp(src, destpath):
+
+                if self.force:
+                    return False # overwrite file in the bash mode (--force)
+
                 while 1:
                     print """Configuration file `%s'
  ==> Since the installation was changed (by you or the script).
