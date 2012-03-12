@@ -33,8 +33,6 @@ from install_parent import install_parent
 # All these setting can be overriden by proper options.
 # On line 16 is example of creating empty directory.
 
-is_eventd = re.compile("event.d/?$")
-
 
 class install_data(_install_data, install_parent):
 
@@ -45,19 +43,14 @@ class install_data(_install_data, install_parent):
         'install everything relative to this alternate root directory'))
     user_options.append(('prefix=', None,
         'installation prefix'))
-    user_options.append(('include-eventd', None,
-        'Include event.d folder in doc folder.'))
-    
-    boolean_options.append('include_eventd')
 
     NOT_ADD_ROOT = 1
 
     # directory patterns which install_data recognize
     dir_patts = ['PREFIX', 'SYSCONFDIR', 'APPCONFDIR', 'LOCALSTATEDIR', 'LIBEXECDIR',
             'LIBDIR', 'DATAROOTDIR', 'DATADIR', 'MANDIR', 'DOCDIR',
-            'INFODIR', 'SBINDIR', 'BINDIR', 'LOCALEDIR', 'PYTHONDIR',
-            'PURELIBDIR', 'APPDIR', 'PUREPYAPPDIR', 'SRCDIR', 'FREDCONFDIR', 
-            'FREDCONFMODULEDIR', 'FREDAPPDIR']
+            'INFODIR', 'SBINDIR', 'BINDIR', 'PYTHONDIR',
+            'PURELIBDIR', 'APPDIR', 'SRCDIR']
 
     def __init__(self, *attrs):
         self.compile = 1
@@ -67,8 +60,6 @@ class install_data(_install_data, install_parent):
         # cache for names of folders translated from proxy value
         self.config_dirs = {
             'APPCONFDIR': None, 
-            'FREDCONFDIR': None, 
-            'FREDCONFMODULEDIR': None, 
         }
 
 
@@ -109,7 +100,6 @@ class install_data(_install_data, install_parent):
         self.prefix = None
         self.root = None
         self.record = None
-        self.include_eventd = None
 
     def finalize_options(self):
         _install_data.finalize_options(self)
@@ -131,11 +121,7 @@ class install_data(_install_data, install_parent):
         
         if self.distribution.command_obj.get("bdist"):
             return False # always overwrite file
-        
-        if self.prepare_debian_package:
-            # do not use confirmation during creation the DEB package
-            return False # always overwrite file
-        
+
         # rmp calls: python setup.py install -cO2 --root=$RPM_BUILD_ROOT 
         #                       --record=INSTALLED_FILES --preservepath
         inst = self.distribution.command_obj.get("install")
@@ -223,12 +209,7 @@ class install_data(_install_data, install_parent):
             else:
                 # it's a tuple with path to install to and a list of files
                 dirname = util.convert_path(self.replaceSpecialDir(filename[0]))
-                
-                # do not include folder event.d
-                # if only the option --include-eventd is set
-                if not self.include_eventd and is_eventd.search(dirname):
-                    continue
-                
+
                 if not os.path.isabs(dirname):
                     if self.is_wininst and dirname[0] == '+':
                         dirname = os.path.join(self.install_dir[:self.install_dir.rfind(os.path.sep)], dirname[1:])

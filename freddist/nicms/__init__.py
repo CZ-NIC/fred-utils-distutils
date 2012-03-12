@@ -1,1 +1,0 @@
-# git-buildpackage is stupid

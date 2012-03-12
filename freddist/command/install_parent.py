@@ -16,14 +16,13 @@ class install_parent(Command):
     # Names of variables what will be copied into other classes 
     # (install_data, install_lib, install_script) by function finalize_options()
     UNDEFINED_OPTIONS = ('root', 'prefix', 'record', 'bindir', 'sbindir', 
-        'sysconfdir', 'appconfdir', 'libexecdir', 'localstatedir', 'libdir', 
+        'sysconfdir', 'appconfdir', 'libexecdir', 'localstatedir', 'libdir',
         'pythondir', 'purelibdir', 'datarootdir', 'datadir', 'infodir', 
         'mandir', 'docdir', 'preservepath', 'no_record', 'no_pycpyo', 'no_mo',
         'no_check_deps', 'fgen_setupcfg', 'no_update_setupcfg', 
         'no_gen_setupcfg', 'no_setupcfg', 'setupcfg_template', 
         'setupcfg_output', 'replace_path_rel', 'after_install', 
-        'prepare_debian_package', 'fredconfdir', 'fredconfmoduledir', 
-        'fredappdir', 'include_eventd', 'include_scripts')
+        'include_scripts')
 
     user_options.append(('bindir=', None,
         'user executables [PREFIX/bin]'))
@@ -55,8 +54,6 @@ class install_parent(Command):
         'man documentation [DATAROOTDIR/man]'))
     user_options.append(('docdir=', None,
         'documentation root [DATAROOTDIR/doc/APPNAME]'))
-    user_options.append(('localedir=', None,
-        'locale-dependent data [DATAROOTDIR/locale]'))
 
     user_options.append(('preservepath', None, 
         'Preserve path(s) in configuration file(s).'))
@@ -85,11 +82,6 @@ class install_parent(Command):
         'When setup.py replace some path, replace it with relative path'))
     user_options.append(('after-install', None,
         'Do everything required after install (syncdb, loaddata)'))
-    user_options.append(('prepare-debian-package', None,
-        'Preparation for the debian package - create debian folder and copy files with modified paths.' \
-        ' Automaticly set on these options: --preservepath --no-compile --no-pycpyo'))
-    user_options.append(('include-eventd', None,
-        'Include event.d folder in doc folder.'))
     user_options.append(('include-scripts', None,
         'Include scripts folder.'))
     
@@ -105,16 +97,12 @@ class install_parent(Command):
     boolean_options.append('no_setupcfg')
     boolean_options.append('replace_path_rel')
     boolean_options.append('after_install')
-    boolean_options.append('prepare_debian_package')
-    boolean_options.append('include_eventd')
     boolean_options.append('include_scripts')
 
 
     dirs = ['prefix', 'bindir', 'sbindir', 'sysconfdir', 'appconfdir', 'libexecdir',
             'localstatedir', 'libdir', 'pythondir', 'purelibdir', 'datarootdir',
-            'datadir', 'infodir', 'mandir', 'docdir', 'localedir', 
-            'appdir', 'purepyappdir', 'srcdir', 'fredconfdir', 
-            'fredconfmoduledir', 'fredappdir']
+            'datadir', 'infodir', 'mandir', 'docdir', 'appdir', 'srcdir']
 
 
     def __init__(self, *attrs):
@@ -169,14 +157,9 @@ class install_parent(Command):
         self.datarootdir    = None
         self.datadir        = None
         self.appdir         = None
-        self.purepyappdir   = None
         self.infodir        = None
         self.mandir         = None
         self.docdir         = None
-        self.localedir      = None
-        self.fredconfdir    = None
-        self.fredconfmoduledir = None
-        self.fredappdir     = None
 
         self.preservepath   = None
         self.no_record      = None
@@ -192,9 +175,7 @@ class install_parent(Command):
         self.setupcfg_output    = None
         self.replace_path_rel   = None
         self.after_install = None
-        self.prepare_debian_package = None
         self.fred_distutils_dir = None
-        self.include_eventd = None
         self.include_scripts = None
 
 
@@ -242,8 +223,6 @@ class install_parent(Command):
             self.datadir = self.datarootdir
         if not self.appdir:
             self.appdir = os.path.join(self.datadir, self.distribution.metadata.name)
-        if not self.purepyappdir:
-            self.purepyappdir = os.path.join(self.purelibdir, self.distribution.metadata.name)
         if not self.infodir:
             self.infodir = os.path.join(self.datarootdir, 'info')
         if not self.mandir:
@@ -251,18 +230,6 @@ class install_parent(Command):
         if not self.docdir:
             self.docdir = os.path.join(
                     self.datarootdir, 'doc', self.distribution.metadata.name)
-        if not self.localedir:
-            self.localedir = os.path.join(self.datarootdir, 'locale')
-        # if self.fredconfdir is None:
-        #   is defined in freddist.nicms.install_module
-        
-        # --prepare-debian-package set on these options automaticly:
-        if self.prepare_debian_package:
-            self.no_compile = True
-            self.no_pycpyo = True
-            self.no_mo = True
-            self.preservepath = True
-            self.no_check_deps = True
 
         if self.after_install:
             # scripts must be included if you want run them after installation

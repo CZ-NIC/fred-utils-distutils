@@ -2,8 +2,11 @@
 freddist.file_util
 Utility function for operating on files
 """
-
-import os, sys, fnmatch, re, stat
+import fnmatch
+import os
+import re
+import stat
+import sys
 from distutils.file_util import *
 
 # by default exclude hidden files/directories
@@ -11,9 +14,6 @@ EXCLUDE_PATTERN = ['.*']
 # and include all other
 INCLUDE_PATTERN = ['*']
 
-#def curdir(path):
-#    """Return directory where setup.py file is situated."""
-#    return os.path.join(os.path.dirname(sys.argv[0]), path)
 
 def fit_pattern(filename, excludePattern):
     """Return True if filename fit `excludePattern', otherwise False"""
@@ -22,40 +22,6 @@ def fit_pattern(filename, excludePattern):
             return True
     return False
 
-def all_files_in_3(dst_directory, directory, excludePattern=None,
-        includePattern=None, recursive=True):
-    if not excludePattern:
-        try:
-            excludePattern = EXCLUDE_PATTERN
-        except NameError:
-            excludePattern = ['.*']
-    if not includePattern:
-        try:
-            includePattern = INCLUDE_PATTERN
-        except NameError:
-            includePattern = ['*']
-    paths = [] # list of couples (directory, directory/file) for all files
-    dirr = os.listdir(directory)
-
-    for filename in dirr:
-        if fit_pattern(filename, excludePattern):
-            continue
-        if not fit_pattern(filename, includePattern):
-            continue
-        full_path = os.path.join(directory, filename)
-
-        newpart = full_path[full_path.find(directory)+len(directory):].strip(os.path.sep)
-
-        if os.path.isfile(full_path):
-            paths.append((os.path.join(dst_directory, newpart), [full_path]))
-
-        elif os.path.isdir(full_path) and recursive:
-            paths.extend(
-                    all_files_in_3(
-                        os.path.join(dst_directory, newpart),
-                        full_path,
-                        excludePattern, includePattern, recursive))
-    return paths
 
 def all_files_in_4(dst_directory, directory, excludePattern=None,
         includePattern=None, recursive=True, prefix=''):
@@ -257,18 +223,6 @@ def collect_data_files(srcdir, data, strip_left_folder=None):
     return data_files
 
 
-def set_file_executable(filepath):
-    "Set file mode to executable"
-    os.chmod(filepath, os.stat(filepath)[stat.ST_MODE] | stat.S_IEXEC | 
-             stat.S_IXGRP | stat.S_IXOTH)
-
-
-def get_folder_kb_size(folder):
-    "Returns folder size in kB (as string)."
-    return re.match('\d+', os.popen('du -s %s' % folder).read()).group(0)
-
-
-
 if __name__ == '__main__':
     # test function all_subpackages_in()
     if len(sys.argv) > 2:
@@ -286,4 +240,3 @@ if __name__ == '__main__':
     
     else:
         print 'Test functions\nUsage: python file_util.py src/folder dest/folder'
-

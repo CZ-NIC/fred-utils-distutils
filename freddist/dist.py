@@ -1,8 +1,8 @@
-import os, sys, string
-from distutils.debug import DEBUG
+import os
+import sys
 from distutils.util import check_environ
 from distutils.dist import Distribution as _Distribution
-from distutils.dist import DistributionMetadata
+
 
 try:
     from freddist.command.config import config 
@@ -45,11 +45,6 @@ except:
     from command.install_lib import install_lib
 
 try:
-    from freddist.command.install_egg_info import install_egg_info
-except:
-    from command.install_egg_info import install_egg_info
-
-try:
     from freddist.command.sdist import sdist 
 except ImportError:
     from command.sdist import sdist
@@ -71,10 +66,6 @@ try:
 except ImportError:
     from command.bdist_wininst import bdist_wininst
 
-# try:
-    # from freddist.command.bdist_dumb import bdist_dumb
-# except ImportError:
-    # from command.bdist_dumb import bdist_dumb
 try:
     from freddist.command.bdist_simple import bdist_simple
 except ImportError:
@@ -119,8 +110,6 @@ class Distribution(_Distribution):
             self.cmdclass['install_scripts'] = install_scripts
         if not self.cmdclass.get('install_lib'):
             self.cmdclass['install_lib'] = install_lib
-        if not self.cmdclass.get('install_egg_info'):
-            self.cmdclass['install_egg_info'] = install_egg_info
         if not self.cmdclass.get('sdist'):
             self.cmdclass['sdist'] = sdist
         if not self.cmdclass.get('bdist'):
@@ -196,14 +185,3 @@ class Distribution(_Distribution):
         
         return files
     # find_config_files ()
-
-
-    def _show_help (self, parser, global_options=1, display_options=1, commands=[]):
-        "Join individual messages after default help"
-        _Distribution._show_help(self, parser, global_options, display_options, commands)
-        # display additions
-        for command_class in self.cmdclass.values():
-            if hasattr(command_class, 'show_after_help'):
-                command_class.show_after_help(commands) # must be staticmethod
-
-

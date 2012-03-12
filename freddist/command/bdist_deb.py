@@ -77,11 +77,9 @@ class bdist_deb (Command):
         if not os.path.isfile(controlpath):
             raise SystemExit, "Error: %s missing." % controlpath
         
-        # options --no-compile --no-pycpyo --preservepath --no-check-deps are
-        # set automaticly by --prepare-debian-package
         # other options must be set in setup.cfg
         ex = "" if self.install_extra_opts is None else self.install_extra_opts
-        command = "python %s/setup.py install %s --prepare-debian-package "\
+        command = "python %s/setup.py install %s --no-compile --no-pycpyo --preservepath --no-check-deps "\
                   "--root=%s" % (self.distribution.srcdir, ex, self.bdist_base)
         print "running command:", command
         if not do_command(command):

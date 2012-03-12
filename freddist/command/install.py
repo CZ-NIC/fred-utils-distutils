@@ -1,7 +1,10 @@
 """
 This module extends distutils.install by new functrions and features .
 """
-import os, re, sys, stat
+import os
+import re
+import sys
+
 from install_parent import install_parent
 from distutils.command.install import install as _install
 from distutils.version import LooseVersion
@@ -77,23 +80,6 @@ class install(_install, install_parent):
         install_parent.finalize_options(self)
         if not self.record and not self.no_record:
             self.record = 'install.log'
-
-
-    def make_preparation_for_debian_package(self, log, values):
-        "Prepare folder for debian package."
-        src_root = os.path.join(self.srcdir, 'doc', 'debian')
-        dest_root = os.path.join(self.get_root(), 'DEBIAN')
-        for name in ('control', 'conffiles', 'postinst', 'postrm'):
-            filename = os.path.join(src_root, name)
-            if os.path.isfile(filename):
-                dest = os.path.join(dest_root, name)
-                self.replace_pattern(filename, dest, values)
-                if log:
-                    log.info('creating %s' % dest)
-                # set privileges to run
-                if name in ('postinst', 'postrm'):
-                    set_file_executable(dest)
-
 
     def get_help4dist(self):
         "Get help depends on distribution"
@@ -269,13 +255,3 @@ class install(_install, install_parent):
     
         _install.run(self)
         self.normalize_record()
-
-
-
-
-def set_file_executable(filepath):
-    "Set file mode to executable"
-    os.chmod(filepath, os.stat(filepath)[stat.ST_MODE] | stat.S_IEXEC | 
-             stat.S_IXGRP | stat.S_IXOTH)
-
-
