@@ -2,9 +2,13 @@
 # -*- coding: utf-8 -*-
 from freddist.core import setup
 
+PACKAGE_VERSION = '1.0'
+PROJECT_NAME = 'fred-distutils'
+PACKAGE_NAME = 'fred-distutils'
+
 setup(
-        name='fred-distutils',
-        version='1.0',
+        name=PROJECT_NAME,
+        version=PACKAGE_VERSION,
         description = 'Fred Distutils',
         author = 'Aleš Doležal, CZ.NIC',
         author_email = 'ales.dolezal@nic.cz',
