@@ -1,8 +1,9 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 from freddist.core import setup
+from freddist.version import get_git_version
 
-PACKAGE_VERSION = '1.0'
+PACKAGE_VERSION = get_git_version()
 PROJECT_NAME = 'fred-distutils'
 PACKAGE_NAME = 'fred-distutils'
 
