@@ -25,6 +25,7 @@ from distutils.cmd import Command
 from distutils.extension import Extension
 
 import ConfigParser
+from freddist.version import get_git_version
 
 try:
     from freddist.dist import Distribution
@@ -57,6 +58,8 @@ def setup(**attrs):
         attrs['script_name'] = os.path.basename(sys.argv[0])
     if not attrs.has_key('script_args'):
         attrs['script_args'] = sys.argv[1:]
+    if not attrs.has_key('version'):
+        attrs['version'] = get_git_version(attrs['srcdir'])
 
     # Create the Distribution instance, using the remaining arguments
     # (ie. everything except distclass) to initialize it
@@ -133,13 +136,13 @@ def setup(**attrs):
             key_bdist = "bdist_rpm"
         if bdist_deb:
             key_bdist = "bdist_deb"
-    
+
     if key_bdist:
         if dist.command_options.has_key(key_bdist):
             bdist_val = dist.command_options[key_bdist]
             if bdist_val.has_key('install_extra_opts'):
                 install_extra_opts = bdist_val['install_extra_opts'][1]
-    
+
     # Parse the command line; any command-line errors are the end user's
     # fault, so turn them into SystemExit to suppress tracebacks.
     try:
@@ -164,11 +167,11 @@ def setup(**attrs):
             if bdist_val.has_key('install_extra_opts'):
                 if bdist_val['install_extra_opts'][0] == 'command line' and\
                         install_extra_opts:
-                    dist.command_options[key_bdist]['install_extra_opts'] =\
+                    dist.command_options[key_bdist]['install_extra_opts'] = \
                             ('command line', append_option(install_extra_opts,
                                 dist.command_options\
                                         [key_bdist]['install_extra_opts'][1]))
-    
+
     if not no_update_setupcfg:
         update_setup_cfg(setupcfg_output, dist.command_options)
     # print "<'))>< thank you for all the fish"
@@ -231,7 +234,7 @@ def copy_setup_cfg(source_dir, config_file, config_template):
     if os.path.isfile(os.path.join(source_dir, config_template)):
         shutil.copyfile(os.path.join(source_dir, config_template),
                 config_file)
-        print "%s has been copied to %s." %\
+        print "%s has been copied to %s." % \
                 (os.path.join(source_dir, config_template), config_file)
 
 def update_setup_cfg(conf_file, options):

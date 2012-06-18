@@ -34,17 +34,21 @@
 
 __all__ = ("get_git_version")
 
+import os
+
 from subprocess import Popen, PIPE
 
 
-def call_git_describe(abbrev=4):
+def call_git_describe(srcdir=None, abbrev=4):
     try:
-        p = Popen(['git', 'describe', '--abbrev=%d' % abbrev, '--tags', '--always'],
-                  stdout=PIPE, stderr=PIPE)
+        command = ['git', 'describe', '--abbrev=%d' % abbrev, '--tags', '--always']
+        if srcdir: # set git options for where is git repository and working tree (must be before describe command)
+            command.insert(1, '--git-dir=%s' % os.path.join(srcdir, '.git'))
+            command.insert(1, '--work-tree=%s' % srcdir)
+        p = Popen(command, stdout=PIPE, stderr=PIPE)
         p.stderr.close()
         line = p.stdout.readlines()[0]
         return line.strip()
-
     except:
         return None
 
@@ -70,14 +74,14 @@ def write_release_version(version):
     f.close()
 
 
-def get_git_version(abbrev=4):
+def get_git_version(srcdir=None, abbrev=4):
     # Read in the version that's currently in RELEASE-VERSION.
 
     release_version = read_release_version()
 
     # First try to get the current version using “git describe”.
 
-    version = call_git_describe(abbrev)
+    version = call_git_describe(srcdir, abbrev)
 
     # If that doesn't work, fall back on the value that's in
     # RELEASE-VERSION.
