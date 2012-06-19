@@ -62,9 +62,12 @@ def call_git_describe(srcdir=None, abbrev=4):
         return None
 
 
-def read_release_version():
+def read_release_version(srcdir=None):
     try:
-        f = open("RELEASE-VERSION", "r")
+        filename = "RELEASE-VERSION"
+        if srcdir:
+            filename = os.path.join(srcdir, filename)
+        f = open(filename, "r")
 
         try:
             version = f.readlines()[0]
@@ -89,7 +92,7 @@ def write_release_version(version, srcdir=None):
 def get_git_version(srcdir=None, abbrev=4):
     # Read in the version that's currently in RELEASE-VERSION.
 
-    release_version = read_release_version()
+    release_version = read_release_version(srcdir)
 
     # First try to get the current version using “git describe”.
 
