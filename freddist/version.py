@@ -40,14 +40,23 @@ from subprocess import Popen, PIPE
 
 
 def call_git_describe(srcdir=None, abbrev=4):
+    ''' Calls git describe returns last tag on branch where we are.
+        If no tags found, git describe is run again
+        with --always argument and returns 'g$revision' instead.
+    '''
     try:
-        command = ['git', 'describe', '--abbrev=%d' % abbrev, '--tags', '--always']
+        command = ['git', 'describe', '--abbrev=%d' % abbrev, '--tags']
         if srcdir: # set git options for where is git repository and working tree (must be before describe command)
             command.insert(1, '--git-dir=%s' % os.path.join(srcdir, '.git'))
             command.insert(1, '--work-tree=%s' % srcdir)
         p = Popen(command, stdout=PIPE, stderr=PIPE)
-        p.stderr.close()
-        line = p.stdout.readlines()[0]
+        if p.wait():
+            # non-zero returncode -> no tags found, run again with --always
+            command.append('--always')
+            p = Popen(command, stdout=PIPE, stderr=PIPE)
+            line = 'g' + p.stdout.readlines()[0] # return git revision with 'g' prefix similart to what --long does for tags
+        else:
+            line = p.stdout.readlines()[0]
         return line.strip()
     except:
         return None
