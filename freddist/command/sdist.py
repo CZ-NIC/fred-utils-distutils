@@ -94,6 +94,10 @@ class sdist(_sdist):
             if self.prune:
                 self.prune_file_list()
 
+            version_file = os.path.join(self.srcdir, 'RELEASE-VERSION')
+            if os.path.exists(version_file):
+                self.filelist.append(version_file)
+
             self.filelist.sort()
             self.filelist.remove_duplicates()
             self.write_manifest()

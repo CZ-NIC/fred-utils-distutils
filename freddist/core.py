@@ -34,7 +34,6 @@ except ImportError:
 
 def setup(**attrs):
     global _setup_stop_after, _setup_distribution
-
     # freddist: if 'srcdir' attribute is not present, lets set it to directory
     # name obtained from first command line argument string.
     if not attrs.has_key('srcdir'):
