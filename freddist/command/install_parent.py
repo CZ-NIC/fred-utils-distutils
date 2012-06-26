@@ -230,7 +230,12 @@ class install_parent(Command):
             self.pythondir = os.path.join(self.libdir, 'python%d.%d' % 
                     (sys.version_info[0], sys.version_info[1]))
         if not self.purelibdir:
-            self.purelibdir = os.path.join(self.pythondir, self.get_site_packages_name())
+            if 'install_lib' in self.distribution.command_options.get('install', {}):
+                path = self.distribution.command_options['install']['install_lib'][1] # ('command line', 'path/path')
+                self.purelibdir = path if path[:1] == '/' else os.path.join(self.prefix, path)
+            else:
+                self.purelibdir = os.path.join(self.pythondir, self.get_site_packages_name())
+
         if not self.datarootdir:
             self.datarootdir = os.path.join(self.prefix, 'share')
         if not self.datadir:
