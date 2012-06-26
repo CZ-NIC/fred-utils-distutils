@@ -72,7 +72,7 @@ class install_data(_install_data, install_parent):
         }
 
 
-    def replaceSpecialDir(self, dir):
+    def replaceSpecialDir(self, dirname):
         """
         Method purpose is to replace `special directory' pattern passed to
         freddist.core.setup function in its data_files list. For example
@@ -84,24 +84,24 @@ class install_data(_install_data, install_parent):
         `/usr/local'. So whole path will be `/usr/local/etc/some_dir').
         Valid patterns are emplaced in self.`dir_patts' variable.
         """
-        keydir = dir
-        for str in self.dir_patts:
-            s = re.search("^"+str, dir)
-            if s:
+        keydir = dirname
+        for strvalue in self.dir_patts:
+            spath = re.search("^"+strvalue, dirname)
+            if spath:
                 if self.is_wininst:
                     self.is_wininst = False
-                    ret = os.path.join(self.getDir_noprefix(str.lower()), dir[s.end():].lstrip(os.path.sep))
-                    if str in ('SYSCONFDIR', 'APPCONFDIR'):
+                    ret = os.path.join(self.getDir_noprefix(strvalue.lower()), dirname[spath.end():].lstrip(os.path.sep))
+                    if strvalue in ('SYSCONFDIR', 'APPCONFDIR'):
                         ret = "+" + ret
                     self.is_wininst = True
                     return ret
-                dir = self.getDir(str.lower(), install_data.NOT_ADD_ROOT) + dir[s.end():]
+                dirname = self.getDir(strvalue.lower(), install_data.NOT_ADD_ROOT) + dirname[spath.end():]
         
         # store translated value of the proxy dir
         if keydir in self.config_dirs.keys():
-            self.config_dirs[keydir] = dir
+            self.config_dirs[keydir] = dirname
         
-        return dir
+        return dirname
 
     def initialize_options(self):
         _install_data.initialize_options(self)
@@ -191,24 +191,24 @@ class install_data(_install_data, install_parent):
             self.compile = 0
             self.optimize = 0
         
-        for f in self.data_files:
-            if type(f) is types.StringType:
+        for filename in self.data_files:
+            if type(filename) is types.StringType:
                 #FREDDIST next line changed
-                if not os.path.exists(f):
-                    f = util.convert_path(os.path.join(self.srcdir, f))
+                if not os.path.exists(filename):
+                    filename = util.convert_path(os.path.join(self.srcdir, filename))
                 if self.warn_dir:
                     self.warn("setup script did not provide a directory for "
                               "'%s' -- installing right in '%s'" %
-                              (f, self.install_dir))
+                              (filename, self.install_dir))
                 
                 # check if the confirmation is required
-                if self.dont_overwrite(f, self.install_dir):
+                if self.dont_overwrite(filename, self.install_dir):
                     continue
                 
                 # it's a simple file, so copy it
-                (out, _) = self.copy_file(f, self.install_dir)
+                (out, _) = self.copy_file(filename, self.install_dir)
                 self.outfiles.append(out)
-                self.modify_file("install_data", f, self.install_dir)
+                self.modify_file("install_data", filename, self.install_dir)
 
                 if out.endswith('.py') and self.compile == 1:
                     os.system('python -c "import py_compile; \
@@ -222,43 +222,43 @@ class install_data(_install_data, install_parent):
                     print "creating optimized %s" % out + 'o'
             else:
                 # it's a tuple with path to install to and a list of files
-                dir = util.convert_path(self.replaceSpecialDir(f[0]))
+                dirname = util.convert_path(self.replaceSpecialDir(filename[0]))
                 
                 # do not include folder event.d
                 # if only the option --include-eventd is set
-                if not self.include_eventd and is_eventd.search(dir):
+                if not self.include_eventd and is_eventd.search(dirname):
                     continue
                 
-                if not os.path.isabs(dir):
-                    if self.is_wininst and dir[0] == '+':
-                        dir = os.path.join(self.install_dir[:self.install_dir.rfind(os.path.sep)], dir[1:])
+                if not os.path.isabs(dirname):
+                    if self.is_wininst and dirname[0] == '+':
+                        dirname = os.path.join(self.install_dir[:self.install_dir.rfind(os.path.sep)], dirname[1:])
                     else:
-                        dir = os.path.join(self.install_dir, dir)
+                        dirname = os.path.join(self.install_dir, dirname)
                 elif self.root:
-                    dir = util.change_root(self.root, dir)
-                self.mkpath(dir)
+                    dirname = util.change_root(self.root, dirname)
+                self.mkpath(dirname)
 
-                if len(f) == 1 or f[1] == []:
+                if len(filename) == 1 or filename[1] == []:
                     # If there are no files listed, the user must be
                     # trying to create an empty directory, so add the
                     # directory to the list of output files.
-                    self.outfiles.append(dir)
-                    print "creating directory %s" % dir
+                    self.outfiles.append(dirname)
+                    print "creating directory %s" % dirname
                 else:
                     # Copy files, adding them to the list of output files.
-                    for data in f[1]:
+                    for data in filename[1]:
                         #FREDDIST next line changed
                         if not os.path.exists(data):
                             data = util.convert_path(
                                     os.path.join(self.srcdir, data))
                         
                         # check if the confirmation is required
-                        if self.dont_overwrite(data, dir):
+                        if self.dont_overwrite(data, dirname):
                             continue
                         
-                        (out, _) = self.copy_file(data, dir)
+                        (out, _) = self.copy_file(data, dirname)
                         self.outfiles.append(out)
-                        self.modify_file("install_data", data, dir)
+                        self.modify_file("install_data", data, dirname)
                         if 'bin' in out.split(os.path.sep) or\
                                 'sbin' in out.split(os.path.sep) or\
                                 'init.d' in out.split(os.path.sep):
