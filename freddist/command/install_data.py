@@ -185,7 +185,7 @@ class install_data(_install_data, install_parent):
 
     def run(self):
         #FREDDIST line added
-        self.mkpath(self.install_dir)
+        #self.mkpath(self.install_dir) # $root/$prefix/local for scheme 'unix_local'
 
         if self.no_pycpyo:
             self.compile = 0
