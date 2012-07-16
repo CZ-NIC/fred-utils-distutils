@@ -49,14 +49,15 @@ def call_git_describe(srcdir=None, abbrev=4):
         if srcdir: # set git options for where is git repository and working tree (must be before describe command)
             command.insert(1, '--git-dir=%s' % os.path.join(srcdir, '.git'))
             command.insert(1, '--work-tree=%s' % srcdir)
-        p = Popen(command, stdout=PIPE, stderr=PIPE)
-        if p.wait():
+        popen = Popen(command, stdout=PIPE, stderr=PIPE)
+        if popen.wait():
             # non-zero returncode -> no tags found, run again with --always
             command.append('--always')
-            p = Popen(command, stdout=PIPE, stderr=PIPE)
-            line = 'g' + p.stdout.readlines()[0] # return git revision with 'g' prefix similart to what --long does for tags
+            popen = Popen(command, stdout=PIPE, stderr=PIPE)
+            # return git revision with 'g' prefix similar to what --long does for tags
+            line = 'g' + popen.stdout.readlines()[0]
         else:
-            line = p.stdout.readlines()[0]
+            line = popen.stdout.readlines()[0]
         return line.strip()
     except:
         return None
@@ -67,14 +68,14 @@ def read_release_version(srcdir=None):
         filename = "RELEASE-VERSION"
         if srcdir:
             filename = os.path.join(srcdir, filename)
-        f = open(filename, "r")
+        file_obj = open(filename, "r")
 
         try:
-            version = f.readlines()[0]
+            version = file_obj.readlines()[0]
             return version.strip()
 
         finally:
-            f.close()
+            file_obj.close()
 
     except:
         return None
@@ -84,9 +85,9 @@ def write_release_version(version, srcdir=None):
     filename = "RELEASE-VERSION"
     if srcdir:
         filename = os.path.join(srcdir, filename)
-    f = open(filename, "w")
-    f.write("%s\n" % version)
-    f.close()
+    file_obj = open(filename, "w")
+    file_obj.write("%s\n" % version)
+    file_obj.close()
 
 
 def get_git_version(srcdir=None, abbrev=4):

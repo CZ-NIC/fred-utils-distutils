@@ -1,45 +1,21 @@
-import sys, os, string
+import os
+import sys
 
-from distutils.debug import DEBUG
+from types import ListType
+
 from distutils.command.bdist_rpm import bdist_rpm as _bdist_rpm
 from distutils.errors import DistutilsPlatformError, DistutilsOptionError
-from distutils.file_util import write_file
-from distutils import log
 
-from types import *
 
 # bdist_rpm notes:
 #
 # new command line options:
 # `--install-extra-opts'
 # `--build-extra-opts'
-#   both of this command are used to add extra option to install (as well
-#   as install_*) and build command. For example I can add prefix option,
+#   both of this command are used to pass options to install (as well
+#   as install_*) and build commands. For example to add prefix option,
 #   and so on.
-#   Default behaviour is first to load possible options from setup.cfg
-#   and then add any other from command line. For example if setup.cfg file
-#   looks like this:
 #
-#       [bdist_rpm]
-#       install-extra-opts=--prefix=/usr/local/
-#
-#   and on command line I type this:
-#
-#       $ python setup.py bdist_rpm --install-extra-opts="--bindir=/bin"
-#
-#   So resulting content of `--install-extra-opts' will be:
-#
-#       --prefix=/usr/local --bindir=/bin
-#
-#   If some option is used twice (i.e. in setup.cfg and on command line),
-#   then command line value is use.
-#
-# `--no-join-opts'
-#   if this option is used, then everything, what was explained in last
-#   paragraph is not valid anymore. After that only options passed by
-#   command line is used (so no joining options from setup and from
-#   command line).
-
 class bdist_rpm(_bdist_rpm):
     user_options = _bdist_rpm.user_options
     boolean_options = _bdist_rpm.boolean_options
@@ -51,45 +27,14 @@ class bdist_rpm(_bdist_rpm):
     user_options.append(('dontpreservepath', None,
         'do not automatically append `--preservepath\'\
         option to `install-extra-opts\''))
-    user_options.append(('no-join-opts', None,
-        'do not join options from setup.cfg and command line'))
 
-    user_options.append(('fgen-setupcfg', None,
-        'force generate setup.cfg from template'))
-    user_options.append(('no-update-setupcfg', None,
-        'do not update setup.cfg file'))
-    user_options.append(('no-gen-setupcfg', None,
-        'do not generate setup.cfg file'))
-    user_options.append(('no-setupcfg', None,
-        'do not use setup.cfg file'))
-    user_options.append(('setupcfg-template=', None,
-        'template file for setup.cfg [setup.cfg.template]'))
-    user_options.append(('setupcfg-output=', None,
-        'output file with setup configuration [setup.cfg]'))
-    
     boolean_options.append('dontpreservepath')
-    boolean_options.append('no_join_opts')
-    boolean_options.append('fgen_setupcfg')
-    boolean_options.append('no_update_setupcfg')
-    boolean_options.append('no_gen_setupcfg')
-    boolean_options.append('no_setupcfg')
-    boolean_options.append('setupcfg_template')
-    boolean_options.append('setupcfg_output')
 
     def initialize_options(self):
         self.build_extra_opts = None
         self.install_extra_opts = None
         self.dontpreservepath = None
-        self.no_join_opts = None
 
-        self.fgen_setupcfg      = None
-        self.no_update_setupcfg = None
-        self.no_gen_setupcfg    = None
-        self.no_setupcfg        = None
-        self.setupcfg_template  = None
-        self.setupcfg_output    = None
-        self.fred_distutils_dir = None
-        
         _bdist_rpm.initialize_options(self)
 
     #FREDDIST new method
@@ -105,13 +50,6 @@ class bdist_rpm(_bdist_rpm):
                 ('dontpreservepath', 'dontpreservepath'),
                 ('build_extra_opts', 'build_extra_opts'),
                 ('install_extra_opts', 'install_extra_opts'),
-                ('no_join_opts', 'no_join_opts'),
-                ('fgen_setupcfg', 'fgen_setupcfg'),
-                ('no_update_setupcfg', 'no_update_setupcfg'),
-                ('no_gen_setupcfg', 'no_gen_setupcfg'),
-                ('no_setupcfg', 'no_setupcfg'),
-                ('setupcfg_template', 'setupcfg_template'),
-                ('setupcfg_output', 'setupcfg_output')
                 )
 
         self.srcdir = self.distribution.srcdir
@@ -157,15 +95,7 @@ class bdist_rpm(_bdist_rpm):
         self.pre_uninstall = self.joinsrcdir(self.pre_uninstall) 
         self.post_uninstall = self.joinsrcdir(self.post_uninstall) 
 
-        if not self.setupcfg_template:
-            self.setupcfg_template = 'setup.cfg.template'
-        if not self.setupcfg_output:
-            self.setupcfg_output = 'setup.cfg'
-
         self.finalize_package_data()
-
-    def run(self):
-        _bdist_rpm.run(self)
 
     def _dist_path(self, path):
         return os.path.join(self.dist_dir, os.path.basename(path))
@@ -224,9 +154,9 @@ class bdist_rpm(_bdist_rpm):
                       'Conflicts',
                       'Obsoletes',
                       ):
-            val = getattr(self, string.lower(field))
+            val = getattr(self, field.lower())
             if type(val) is ListType:
-                spec_file.append('%s: %s' % (field, string.join(val)))
+                spec_file.append('%s: %s' % (field, ''.join(val)))
             elif val is not None:
                 spec_file.append('%s: %s' % (field, val))
 
@@ -239,7 +169,7 @@ class bdist_rpm(_bdist_rpm):
 
         if self.build_requires:
             spec_file.append('BuildRequires: ' +
-                             string.join(self.build_requires))
+                             ''.join(self.build_requires))
 
         if self.icon:
             spec_file.append('Icon: ' + os.path.basename(self.icon))
@@ -265,7 +195,7 @@ class bdist_rpm(_bdist_rpm):
 
         # rpm scripts
         # figure out default build script
-        def_setup_call = "%s %s" % (self.python,os.path.basename(sys.argv[0]))
+        def_setup_call = "%s %s" % (self.python, os.path.basename(sys.argv[0]))
         def_build = "%s build" % def_setup_call
         if self.use_rpm_opt_flags:
             def_build = 'env CFLAGS="$RPM_OPT_FLAGS" ' + def_build
@@ -310,7 +240,7 @@ class bdist_rpm(_bdist_rpm):
                     '%' + rpm_opt,])
                 if val:
                     print "read val"
-                    spec_file.extend(string.split(open(val, 'r').read(), '\n'))
+                    spec_file.extend(open(val, 'r').read().split('\n'))
                 else:
                     print "not print var; default:", default
                     spec_file.append(default)
@@ -324,7 +254,7 @@ class bdist_rpm(_bdist_rpm):
             ])
 
         if self.doc_files:
-            spec_file.append('%doc ' + string.join(self.doc_files))
+            spec_file.append('%doc ' + ''.join(self.doc_files))
 
         if self.changelog:
             spec_file.extend([
@@ -335,4 +265,3 @@ class bdist_rpm(_bdist_rpm):
         return spec_file
 
     # _make_spec_file ()
-

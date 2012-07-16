@@ -1,5 +1,7 @@
 import os
+
 from distutils.command.build_scripts import build_scripts as _build_scripts
+
 
 class build_scripts(_build_scripts):
     def finalize_options(self):

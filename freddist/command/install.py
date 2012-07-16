@@ -5,9 +5,10 @@ import os
 import re
 import sys
 
-from install_parent import install_parent
 from distutils.command.install import install as _install
 from distutils.version import LooseVersion
+
+from freddist.command.install_parent import install_parent
 
 
 # Difference between freddist.install and distutils.install class isn't wide.
@@ -84,18 +85,17 @@ class install(_install, install_parent):
     def get_help4dist(self):
         "Get help depends on distribution"
         # set the distribution depended help
-        dist, help = None, {}
+        dist, help_text = None, {}
         if self.DEPS_HELP is None:
-            return dist, help
+            return dist, help_text
         
         if re.search('Ubuntu', sys.version):
             dist = 'deb'
         elif re.search('Fedora', sys.version):
             dist = 'rpm'
         if dist and self.DEPS_HELP.has_key(dist):
-            help = self.DEPS_HELP[dist]
-        return dist, help
-
+            help_text = self.DEPS_HELP[dist]
+        return dist, help_text
 
     def __check_import_module(self, module_name):
         "Check module by import"

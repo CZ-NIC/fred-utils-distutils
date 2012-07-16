@@ -5,9 +5,8 @@ Utility function for operating on files
 import fnmatch
 import os
 import re
-import stat
 import sys
-from distutils.file_util import *
+
 
 # by default exclude hidden files/directories
 EXCLUDE_PATTERN = ['.*']

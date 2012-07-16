@@ -1,9 +1,11 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-import os, sys
+import os
 import subprocess
+import sys
+
 from distutils.core import Command
-# freddist
+
 from freddist.command.install_parent import install_parent
 
 
@@ -24,8 +26,7 @@ class bdist_deb (Command):
         ('platform=', None, "OS platform [all]"),
         ('install-extra-opts=', 'i', 'extra option(s) passed to install command'), 
     ]
-    
-    
+
     def initialize_options (self):
         self.bdist_base = None
         self.epoch = None
@@ -33,9 +34,7 @@ class bdist_deb (Command):
         self.release = None
         self.build_int = None
         self.platform = None
-        self.fred_distutils_dir = None
         self.install_extra_opts = None
-
 
     def finalize_options (self):
         if not self.bdist_base:
@@ -43,7 +42,7 @@ class bdist_deb (Command):
         elif self.bdist_base == "build":
             raise SystemExit("Error --bdist-base: Folder name 'build' is " \
                              "reserved for building process.")
-        
+
         # epoch zero is shown empty string "" otherwice "NUMBER:"
         if not self.epoch:
             self.epoch = ''
@@ -64,7 +63,6 @@ class bdist_deb (Command):
             if bdist_val.has_key('install_extra_opts'):
                 self.install_extra_opts = bdist_val['install_extra_opts'][1]   
 
-
     def run (self):
         # check if exists tool for create deb package
         if os.popen("which dpkg-deb").read() == "":
@@ -79,8 +77,8 @@ class bdist_deb (Command):
         
         # other options must be set in setup.cfg
         ex = "" if self.install_extra_opts is None else self.install_extra_opts
-        command = "python %s/setup.py install %s --no-compile --no-pycpyo --preservepath --no-check-deps "\
-                  "--root=%s" % (self.distribution.srcdir, ex, self.bdist_base)
+        command = "python %s install %s --no-compile --no-pycpyo --preservepath --no-check-deps "\
+                  "--root=%s" % (os.path.join(self.distribution.srcdir, 'setup.py') , ex, self.bdist_base)
         print "running command:", command
         if not do_command(command):
             return
@@ -110,11 +108,10 @@ class bdist_deb (Command):
             if not do_command(command):
                 break
 
-
 def do_command(command):
     "Run any command in subprocess"
-    p = subprocess.Popen(command, shell=True, stderr=subprocess.PIPE)
-    error = p.stderr.read()
+    popen = subprocess.Popen(command, shell=True, stderr=subprocess.PIPE)
+    error = popen.stderr.read()
     if error:
         print >> sys.stderr, error
         return False

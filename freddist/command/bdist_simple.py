@@ -1,11 +1,10 @@
-import sys, os, string
+import os
+import shutil
+import sys
+import tempfile
 
 from distutils.core import Command
-from distutils import log
 from distutils.errors import DistutilsPlatformError
-
-import tempfile
-import shutil
 
 
 class bdist_simple(Command):
@@ -29,36 +28,13 @@ class bdist_simple(Command):
     user_options.append(('dontpreservepath', None,
         'do not automatically append `--preservepath\'\
         option to `install-extra-opts\''))
-    user_options.append(('no-join-opts', None,
-        'do not join options from setup.cfg and command line'))
 
-    user_options.append(('fgen-setupcfg', None,
-        'force generate setup.cfg from template'))
-    user_options.append(('no-update-setupcfg', None,
-        'do not update setup.cfg file'))
-    user_options.append(('no-gen-setupcfg', None,
-        'do not generate setup.cfg file'))
-    user_options.append(('no-setupcfg', None,
-        'do not use setup.cfg file'))
-    user_options.append(('setupcfg-template=', None,
-        'template file for setup.cfg [setup.cfg.template]'))
-    user_options.append(('setupcfg-output=', None,
-        'output file with setup configuration [setup.cfg]'))
+    boolean_options = ['keep-temp', 'dontpreservepath']
 
-    boolean_options = ['keep-temp',
-            'dontpreservepath',
-            'no_join_opts',
-            'fgen_setupcfg',
-            'no_update_setupcfg',
-            'no_gen_setupcfg',
-            'setupcfg_template',
-            'setupcfg_output']
-    
     default_format = {
             'posix': 'gztar',
             'nt': 'zip',
             'os2': 'zip' }
-
 
     def initialize_options(self):
         # exampleeeeeeeee
@@ -71,14 +47,6 @@ class bdist_simple(Command):
         self.build_extra_opts = None
         self.install_extra_opts = None
         self.dontpreservepath = None
-        self.no_join_opts = None
-
-        self.fgen_setupcfg      = None
-        self.no_update_setupcfg = None
-        self.no_gen_setupcfg    = None
-        self.no_setupcfg        = None
-        self.setupcfg_template  = None
-        self.setupcfg_output    = None
 
     def finalize_options(self):
         if self.bdist_dir is None:
@@ -98,13 +66,6 @@ class bdist_simple(Command):
                 ('dontpreservepath', 'dontpreservepath'),
                 ('build_extra_opts', 'build_extra_opts'),
                 ('install_extra_opts', 'install_extra_opts'),
-                ('no_join_opts', 'no_join_opts'),
-                ('fgen_setupcfg', 'fgen_setupcfg'),
-                ('no_update_setupcfg', 'no_update_setupcfg'),
-                ('no_gen_setupcfg', 'no_gen_setupcfg'),
-                ('no_setupcfg', 'no_setupcfg'),
-                ('setupcfg_template', 'setupcfg_template'),
-                ('setupcfg_output', 'setupcfg_output')
                 )
         if not self.output_file_name:
             self.output_file_name = self.distribution.metadata.name \

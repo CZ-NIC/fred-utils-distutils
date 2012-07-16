@@ -1,8 +1,10 @@
 """
 Parent class for all install* classes
 """
+import os
+import re
+import sys
 
-import re, os, sys
 from distutils.cmd import Command
 
 
@@ -19,9 +21,7 @@ class install_parent(Command):
         'sysconfdir', 'appconfdir', 'libexecdir', 'localstatedir', 'libdir',
         'pythondir', 'purelibdir', 'datarootdir', 'datadir', 'infodir', 
         'mandir', 'docdir', 'preservepath', 'no_record', 'no_pycpyo', 'no_mo',
-        'no_check_deps', 'fgen_setupcfg', 'no_update_setupcfg', 
-        'no_gen_setupcfg', 'no_setupcfg', 'setupcfg_template', 
-        'setupcfg_output', 'replace_path_rel', 'after_install', 
+        'no_check_deps', 'replace_path_rel', 'after_install',
         'include_scripts')
 
     user_options.append(('bindir=', None,
@@ -66,44 +66,25 @@ class install_parent(Command):
     user_options.append(('no-check-deps', None,
         'do not check dependencies'))
 
-    user_options.append(('fgen-setupcfg', None,
-        'force generate setup.cfg from template'))
-    user_options.append(('no-update-setupcfg', None,
-        'do not update setup.cfg file'))
-    user_options.append(('no-gen-setupcfg', None,
-        'do not generate setup.cfg file'))
-    user_options.append(('no-setupcfg', None,
-        'do not use setup.cfg file'))
-    user_options.append(('setupcfg-template=', None,
-        'template file for setup.cfg [setup.cfg.template]'))
-    user_options.append(('setupcfg-output=', None,
-        'output file with setup configuration [setup.cfg]'))
     user_options.append(('replace-path-rel', None,
         'When setup.py replace some path, replace it with relative path'))
     user_options.append(('after-install', None,
         'Do everything required after install (syncdb, loaddata)'))
     user_options.append(('include-scripts', None,
         'Include scripts folder.'))
-    
-    
+
     boolean_options.append('preservepath')
     boolean_options.append('no_record')
     boolean_options.append('no_pycpyo')
     boolean_options.append('no_mo')
     boolean_options.append('no_check_deps')
-    boolean_options.append('fgen_setupcfg')
-    boolean_options.append('no_update_setupcfg')
-    boolean_options.append('no_gen_setupcfg')
-    boolean_options.append('no_setupcfg')
     boolean_options.append('replace_path_rel')
     boolean_options.append('after_install')
     boolean_options.append('include_scripts')
 
-
     dirs = ['prefix', 'bindir', 'sbindir', 'sysconfdir', 'appconfdir', 'libexecdir',
             'localstatedir', 'libdir', 'pythondir', 'purelibdir', 'datarootdir',
             'datadir', 'infodir', 'mandir', 'docdir', 'appdir', 'srcdir']
-
 
     def __init__(self, *attrs):
         self.is_bdist_mode = None
@@ -118,7 +99,6 @@ class install_parent(Command):
             if self.is_bdist_mode:
                 break
 
-
     def get_actual_root(self):
         '''
         Return actual root only in case if the process is not in creation of
@@ -129,7 +109,6 @@ class install_parent(Command):
                         or self.is_bdist_mode \
                   else \
                         self.root
-    
 
     def get_root(self, apply_preservepath=None):
         "Return aways root except if the parameter apply_preservepath is set."
@@ -139,7 +118,6 @@ class install_parent(Command):
         if apply_preservepath and (self.is_bdist_mode or self.preservepath):
             root = '' # reset root
         return root
-    
 
     def initialize_options(self):
         self.prefix         = None
@@ -167,17 +145,9 @@ class install_parent(Command):
         self.no_mo          = None
         self.no_check_deps  = None
 
-        self.fgen_setupcfg      = None
-        self.no_update_setupcfg = None
-        self.no_gen_setupcfg    = None
-        self.no_setupcfg        = None
-        self.setupcfg_template  = None
-        self.setupcfg_output    = None
         self.replace_path_rel   = None
         self.after_install = None
-        self.fred_distutils_dir = None
         self.include_scripts = None
-
 
     def set_option_values(self):
         "Set values options"
@@ -235,13 +205,11 @@ class install_parent(Command):
             # scripts must be included if you want run them after installation
             self.include_scripts = True
 
-
     def get_site_packages_name(self):
         "Returns actual name 'site_packages' (Can be also 'dist-packages')"
         if self.install_purelib is None:
             return ''
         return self.install_purelib.split('/')[-1]
-
 
     def finalize_options(self):
         self.srcdir = self.distribution.srcdir
@@ -249,19 +217,13 @@ class install_parent(Command):
             # prefix is empty - set it to the default value
             self.prefix = os.path.join('/', 'usr', 'local')
         self.set_option_values()
-        if not self.setupcfg_template:
-            self.setupcfg_template = 'setup.cfg.template'
-        if not self.setupcfg_output:
-            self.setupcfg_output = 'setup.cfg'
-
 
     def set_directories(self, prefix=None):
         if prefix:
             self.prefix = prefix
         self.set_option_values()
 
-
-    def replace_pattern(self, fileOpen, fileSave=None, values = []):
+    def replace_pattern(self, fileOpen, fileSave=None, values = None):
         """
         Replace given patterns with new values, for example in config files.
         Patterns and new values can contain regular expressions.
@@ -273,7 +235,7 @@ class install_parent(Command):
             fileSave = fileOpen
         body = open(fileOpen).read()
 
-        for value in values:
+        for value in values or []:
             body = re.sub(value[0], value[1], body)
         try:
             if not os.path.isdir(os.path.dirname(fileSave)):
@@ -290,14 +252,14 @@ class install_parent(Command):
         if self.is_wininst:
             return self.install_dir
         try:
-            dir = getattr(self, directory.lower())
+            dir_name = getattr(self, directory.lower())
         except AttributeError:
             return ''
         if no_add_root is not None:
-            return dir
+            return dir_name
         if self.get_actual_root():
-            return os.path.join(self.root, dir.lstrip(os.path.sep))
-        return dir
+            return os.path.join(self.root, dir_name.lstrip(os.path.sep))
+        return dir_name
 
     def getDir_nop(self, directory):
         """
@@ -310,13 +272,13 @@ class install_parent(Command):
         if self.is_wininst:
             return self.install_dir
         try:
-            dir = getattr(self, directory.lower())
+            dir_name = getattr(self, directory.lower())
         except AttributeError:
             return ''
         if self.root:
-            return os.path.join(self.root, dir.lstrip(os.path.sep))
+            return os.path.join(self.root, dir_name.lstrip(os.path.sep))
         else:
-            return dir
+            return dir_name
 
     def getDir_noprefix(self, directory):
         """
@@ -324,11 +286,11 @@ class install_parent(Command):
         part, as well as without optional root part.
         """
         try:
-            dir = getattr(self, directory.lower())
+            dir_name = getattr(self, directory.lower())
         except AttributeError:
             return ''
-        return dir.replace(os.path.commonprefix(
-            [self.prefix, dir]), '').strip(os.path.sep)
+        return dir_name.replace(os.path.commonprefix(
+            [self.prefix, dir_name]), '').strip(os.path.sep)
 
     def getDir_std(self, directory):
         """
@@ -378,17 +340,16 @@ class install_parent(Command):
         #proceed only if i record
         if self.record:
             record = open(self.record).readlines()
-            for file in files:
+            for filename in files:
                 # i must ensure, that every file from files has new line
                 # character at end
-                file = file.strip() + '\n'
-                if not file in record:
+                filename = filename.strip() + '\n'
+                if not filename in record:
                     # file is not in record, so add it
-                    record.append(file)
+                    record.append(filename)
             open(self.record, 'w').writelines(record)
             print "record file has been updated"
 
-    
     def modify_file(self, command, filename, targetpath):
         "Modify file if any function is defined."
         if not hasattr(self.distribution, "modify_files"):

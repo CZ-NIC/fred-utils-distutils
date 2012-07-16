@@ -1,15 +1,16 @@
 #!/usr/bin/env python
-import sys, os
+import os
+import sys
 
-from distutils.command.bdist_wininst import bdist_wininst as _bdist_wininst
 from distutils import log
-from distutils.util import get_platform
+from distutils.command.bdist_wininst import bdist_wininst as _bdist_wininst
 from distutils.dir_util import remove_tree
-from distutils.errors import DistutilsOptionError, DistutilsPlatformError
+from distutils.errors import DistutilsFileError, DistutilsOptionError, DistutilsPlatformError
 from distutils.sysconfig import get_python_version, get_python_lib
-from distutils.errors import DistutilsFileError
+from distutils.util import get_platform
 
-from install_parent import install_parent
+from freddist.command.install_parent import install_parent
+
 
 class bdist_wininst(_bdist_wininst, install_parent):
     user_options = _bdist_wininst.user_options
@@ -22,43 +23,14 @@ class bdist_wininst(_bdist_wininst, install_parent):
     user_options.append(('dontpreservepath', None,
         'do not automatically append `--preservepath\'\
         option to `install-extra-opts\''))
-    user_options.append(('no-join-opts', None,
-        'do not join options from setup.cfg and command line'))
 
-    user_options.append(('fgen-setupcfg', None,
-        'force generate setup.cfg from template'))
-    user_options.append(('no-update-setupcfg', None,
-        'do not update setup.cfg file'))
-    user_options.append(('no-gen-setupcfg', None,
-        'do not generate setup.cfg file'))
-    user_options.append(('no-setupcfg', None,
-        'do not use setup.cfg file'))
-    user_options.append(('setupcfg-template=', None,
-        'template file for setup.cfg [setup.cfg.template]'))
-    user_options.append(('setupcfg-output=', None,
-        'output file with setup configuration [setup.cfg]'))
-    
     boolean_options.append('dontpreservepath')
-    boolean_options.append('no_join_opts')
-    boolean_options.append('fgen_setupcfg')
-    boolean_options.append('no_update_setupcfg')
-    boolean_options.append('no_gen_setupcfg')
-    boolean_options.append('no_setupcfg')
-    boolean_options.append('setupcfg_template')
-    boolean_options.append('setupcfg_output')
 
     def initialize_options(self):
         self.build_extra_opts = None
         self.install_extra_opts = None
         self.dontpreservepath = None
-        self.no_join_opts = None
 
-        self.fgen_setupcfg      = None
-        self.no_update_setupcfg = None
-        self.no_gen_setupcfg    = None
-        self.no_setupcfg        = None
-        self.setupcfg_template  = None
-        self.setupcfg_output    = None
         _bdist_wininst.initialize_options(self)
 
     def joinsrcdir(self, what):
@@ -73,13 +45,6 @@ class bdist_wininst(_bdist_wininst, install_parent):
                 ('dontpreservepath', 'dontpreservepath'),
                 ('build_extra_opts', 'build_extra_opts'),
                 ('install_extra_opts', 'install_extra_opts'),
-                ('no_join_opts', 'no_join_opts'),
-                ('fgen_setupcfg', 'fgen_setupcfg'),
-                ('no_update_setupcfg', 'no_update_setupcfg'),
-                ('no_gen_setupcfg', 'no_gen_setupcfg'),
-                ('no_setupcfg', 'no_setupcfg'),
-                ('setupcfg_template', 'setupcfg_template'),
-                ('setupcfg_output', 'setupcfg_output')
                 )
         self.srcdir = self.distribution.srcdir
         if self.bdist_dir is None:
@@ -218,15 +183,15 @@ class bdist_wininst(_bdist_wininst, install_parent):
             # use what we use
             # string compares seem wrong, but are what sysconfig.py itself uses
             if self.target_version > cur_version:
-                bv = get_build_version()
+                version = get_build_version()
             else:
                 if self.target_version < "2.4":
-                    bv = 6.0
+                    version = 6.0
                 else:
-                    bv = 7.1
+                    version = 7.1
         else:
             # for current version - use authoritative check.
-            bv = get_build_version()
+            version = get_build_version()
 
         # wininst-x.y.exe is in the same directory as this file
         directory = os.path.join(os.path.split(get_python_lib())[0], 'distutils', 'command')
@@ -241,7 +206,7 @@ class bdist_wininst(_bdist_wininst, install_parent):
         else:
             sfix = ''
 
-        filename = os.path.join(directory, "wininst-%.1f%s.exe" % (bv, sfix))
+        filename = os.path.join(directory, "wininst-%.1f%s.exe" % (version, sfix))
         try:
             return open(filename, "rb").read()
         except IOError, msg:
