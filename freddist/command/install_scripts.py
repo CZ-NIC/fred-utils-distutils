@@ -66,8 +66,8 @@ class install_scripts(_install_scripts, install_parent):
             return
 
         _install_scripts.run(self)
-        
+
         # modify scripts if it is necessary
         for filepath in self.outfiles:
-            self.modify_file("install_scripts", os.path.join(self.build_dir, 
+            self.modify_file("install_scripts", os.path.join(self.build_dir,
                         os.path.basename(filepath)), os.path.dirname(filepath))

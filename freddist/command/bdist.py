@@ -5,7 +5,7 @@ def show_formats ():
     """Print list of available formats (arguments to "--format" option).
     """
     from distutils.fancy_getopt import FancyGetopt
-    formats=[]
+    formats = []
     for format in bdist.format_commands:
         formats.append(("formats=" + format, None,
                         bdist.format_command[format][1]))
@@ -19,7 +19,7 @@ class bdist(_bdist):
     boolean_options = _bdist.boolean_options
     format_commands = _bdist.format_commands + ['deb']
     format_command = _bdist.format_command
-    format_command.update({'deb': ('bdist_deb',  "Debian distribution")})
+    format_command.update({'deb': ('bdist_deb', "Debian distribution")})
 
     help_options = [
         ('help-formats', None,
@@ -48,7 +48,7 @@ class bdist(_bdist):
         'template file for setup.cfg [setup.cfg.template]'))
     user_options.append(('setupcfg-output=', None,
         'output file with setup configuration [setup.cfg]'))
-    
+
     boolean_options.append('dontpreservepath')
     boolean_options.append('no_join_opts')
     boolean_options.append('fgen_setupcfg')
@@ -60,24 +60,24 @@ class bdist(_bdist):
 
 
     def initialize_options(self):
-        self.build_extra_opts   = None
+        self.build_extra_opts = None
         self.install_extra_opts = None
-        self.dontpreservepath   = None
-        self.no_join_opts       = None
-        self.fgen_setupcfg      = None
+        self.dontpreservepath = None
+        self.no_join_opts = None
+        self.fgen_setupcfg = None
         self.no_update_setupcfg = None
-        self.no_gen_setupcfg    = None
-        self.no_setupcfg        = None
-        self.setupcfg_template  = None
-        self.setupcfg_output    = None
+        self.no_gen_setupcfg = None
+        self.no_setupcfg = None
+        self.setupcfg_template = None
+        self.setupcfg_output = None
         self.fred_distutils_dir = None
-        
+
         _bdist.initialize_options(self)
 
     def finalize_options(self):
         if not self.build_extra_opts:
             self.build_extra_opts = ''
-        
+
         if not self.install_extra_opts and not self.dontpreservepath:
             self.install_extra_opts = '--preservepath'
         elif self.install_extra_opts and not self.dontpreservepath:

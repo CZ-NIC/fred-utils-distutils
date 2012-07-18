@@ -37,7 +37,7 @@ class bdist_wininst(_bdist_wininst, install_parent):
         'template file for setup.cfg [setup.cfg.template]'))
     user_options.append(('setupcfg-output=', None,
         'output file with setup configuration [setup.cfg]'))
-    
+
     boolean_options.append('dontpreservepath')
     boolean_options.append('no_join_opts')
     boolean_options.append('fgen_setupcfg')
@@ -53,12 +53,12 @@ class bdist_wininst(_bdist_wininst, install_parent):
         self.dontpreservepath = None
         self.no_join_opts = None
 
-        self.fgen_setupcfg      = None
+        self.fgen_setupcfg = None
         self.no_update_setupcfg = None
-        self.no_gen_setupcfg    = None
-        self.no_setupcfg        = None
-        self.setupcfg_template  = None
-        self.setupcfg_output    = None
+        self.no_gen_setupcfg = None
+        self.no_setupcfg = None
+        self.setupcfg_template = None
+        self.setupcfg_output = None
         _bdist_wininst.initialize_options(self)
 
     def joinsrcdir(self, what):

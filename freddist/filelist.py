@@ -39,4 +39,3 @@ class FileList(_FileList):
         if prefix:
             prefix = os.path.join(self.srcdir, prefix)
         return _FileList.include_pattern(self, pattern, anchor, prefix, is_regex)
-

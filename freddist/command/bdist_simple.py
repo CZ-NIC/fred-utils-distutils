@@ -53,7 +53,7 @@ class bdist_simple(Command):
             'no_gen_setupcfg',
             'setupcfg_template',
             'setupcfg_output']
-    
+
     default_format = {
             'posix': 'gztar',
             'nt': 'zip',
@@ -73,12 +73,12 @@ class bdist_simple(Command):
         self.dontpreservepath = None
         self.no_join_opts = None
 
-        self.fgen_setupcfg      = None
+        self.fgen_setupcfg = None
         self.no_update_setupcfg = None
-        self.no_gen_setupcfg    = None
-        self.no_setupcfg        = None
-        self.setupcfg_template  = None
-        self.setupcfg_output    = None
+        self.no_gen_setupcfg = None
+        self.no_setupcfg = None
+        self.setupcfg_template = None
+        self.setupcfg_output = None
 
     def finalize_options(self):
         if self.bdist_dir is None:
@@ -128,7 +128,7 @@ class bdist_simple(Command):
     def run(self):
         cmd = "python %s install %s --prefix=%s --sysconfdir=%s --bindir=%s --sbindir=%s \
                 --libdir=%s --datarootdir=%s --replace-path-rel" % (
-                sys.argv[0], 
+                sys.argv[0],
                 self.install_extra_opts,
                 self.getRandTempDir(),
                 os.path.join(self.getRandTempDir(), 'data_files', 'conf'),
@@ -136,7 +136,7 @@ class bdist_simple(Command):
                 self.getRandTempDir(),
                 os.path.join(self.getRandTempDir(), 'data_files', 'lib'),
                 os.path.join(self.getRandTempDir(), 'data_files'))
-                
+
         os.popen(cmd, "w")
 
         cwd = os.getcwd()
@@ -148,25 +148,25 @@ class bdist_simple(Command):
             cmd = 'tar cf %s.tar %s' % (os.path.join(
                 cwd,
                 self.dist_dir,
-                self.output_file_name), 
+                self.output_file_name),
                 os.path.basename(self.getRandTempDir()))
         elif self.format == 'bz2tar':
             cmd = 'tar cjf %s.tar.bz2 %s' % (os.path.join(
                 cwd,
                 self.dist_dir,
-                self.output_file_name), 
+                self.output_file_name),
                 os.path.basename(self.getRandTempDir()))
         elif self.format == 'gztar':
             cmd = 'tar czf %s.tar.gz %s' % (os.path.join(
                 cwd,
                 self.dist_dir,
-                self.output_file_name), 
+                self.output_file_name),
                 os.path.basename(self.getRandTempDir()))
         elif self.format == 'ztar':
             cmd = 'tar cZf %s.tar.Z %s' % (os.path.join(
                 cwd,
                 self.dist_dir,
-                self.output_file_name), 
+                self.output_file_name),
                 os.path.basename(self.getRandTempDir()))
         elif self.format == 'zip':
             cmd = 'zip -r %s.zip %s' % (os.path.join(
@@ -174,7 +174,7 @@ class bdist_simple(Command):
                 self.dist_dir,
                 self.output_file_name),
                 os.path.basename(self.getRandTempDir()))
-        
+
         os.chdir(os.path.dirname(self.getRandTempDir()))
 
         os.popen(cmd)

@@ -16,7 +16,7 @@ class build_py(_build_py):
         (at least according to the 'package_dir' option, if any).
         Standart distutils build_py does not support scrdir option.
         So Build_py class implements this funkcionality. This code
-        is from http://lists.mysql.com/ndb-connectors/617 
+        is from http://lists.mysql.com/ndb-connectors/617
         """
         path = string.split(package, '.')
 
@@ -64,8 +64,8 @@ class build_py(_build_py):
         "Modify file if any function is defined."
         if not hasattr(self.distribution, "modify_files"):
             return
-        
-        # modify_files: {"command": 
+
+        # modify_files: {"command":
         #                 (("module.function", ("filename", ...)), ...), ...}
         for mfncname, files in self.distribution.modify_files.get(command, []):
             modulename, fncname = mfncname.split(".")
@@ -118,4 +118,3 @@ class build_py(_build_py):
 
     def run(self):
         _build_py.run(self)
-

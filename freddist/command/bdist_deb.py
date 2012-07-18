@@ -22,10 +22,10 @@ class bdist_deb (Command):
         ('release=', None, "Debian release [%s]" % UBUNTU_NAME),
         ('build-int=', None, "Package build int [1]"),
         ('platform=', None, "OS platform [all]"),
-        ('install-extra-opts=', 'i', 'extra option(s) passed to install command'), 
+        ('install-extra-opts=', 'i', 'extra option(s) passed to install command'),
     ]
-    
-    
+
+
     def initialize_options (self):
         self.bdist_base = None
         self.epoch = None
@@ -43,7 +43,7 @@ class bdist_deb (Command):
         elif self.bdist_base == "build":
             raise SystemExit("Error --bdist-base: Folder name 'build' is " \
                              "reserved for building process.")
-        
+
         # epoch zero is shown empty string "" otherwice "NUMBER:"
         if not self.epoch:
             self.epoch = ''
@@ -57,12 +57,12 @@ class bdist_deb (Command):
             self.build_int = '1'
         if not self.platform:
             self.platform = 'all' # architecture
-        
+
         # it is necessary overwrite extra-opts if the command 'bdist' is set
         if self.distribution.command_options.has_key('bdist'):
             bdist_val = self.distribution.command_options['bdist']
             if bdist_val.has_key('install_extra_opts'):
-                self.install_extra_opts = bdist_val['install_extra_opts'][1]   
+                self.install_extra_opts = bdist_val['install_extra_opts'][1]
 
 
     def run (self):
@@ -70,13 +70,13 @@ class bdist_deb (Command):
         if os.popen("which dpkg-deb").read() == "":
             raise SystemExit, "Error: dpkg-deb missing. "\
                               "It is required for create deb."
-        
+
         # check debian/control
-        controlpath = os.path.join(self.distribution.srcdir, 
+        controlpath = os.path.join(self.distribution.srcdir,
                                    "doc", "debian", "control")
         if not os.path.isfile(controlpath):
             raise SystemExit, "Error: %s missing." % controlpath
-        
+
         # other options must be set in setup.cfg
         ex = "" if self.install_extra_opts is None else self.install_extra_opts
         command = "python %s/setup.py install %s --no-compile --no-pycpyo --preservepath --no-check-deps "\
@@ -86,10 +86,10 @@ class bdist_deb (Command):
             return
 
         # prepare package name and find paths
-        version = "%s%s-%s~%s+%s" % (self.epoch, 
-                self.distribution.get_version(), self.package_version, 
+        version = "%s%s-%s~%s+%s" % (self.epoch,
+                self.distribution.get_version(), self.package_version,
                 self.release, self.build_int)
-        deb_name = "%s_%s_%s" % (self.distribution.get_name(), version, 
+        deb_name = "%s_%s_%s" % (self.distribution.get_name(), version,
                                  self.platform)
         build_dir = os.path.abspath(self.bdist_base)
         current_dir = os.getcwd()
@@ -97,14 +97,14 @@ class bdist_deb (Command):
         # modify control file
         path = os.path.join(build_dir, "DEBIAN", "control")
         command_obj = install_parent()
-        command_obj.replace_pattern(path, path, 
+        command_obj.replace_pattern(path, path,
                 (("PACKAGE_VERSION", version), ("PLATFORM", self.platform)))
-        
+
         for command in (
             'cd %s; find * -type f | grep -v "^DEBIAN/" | while read x;'\
-                        'do md5sum "${x}";done > DEBIAN/md5sums' % build_dir, 
-            'cd %s' % current_dir, 
-            'dpkg-deb -b %s %s.deb' % (build_dir, deb_name), 
+                        'do md5sum "${x}";done > DEBIAN/md5sums' % build_dir,
+            'cd %s' % current_dir,
+            'dpkg-deb -b %s %s.deb' % (build_dir, deb_name),
             ):
             print "running command:", command
             if not do_command(command):

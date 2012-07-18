@@ -57,7 +57,7 @@ class uninstall(Command):
         except:
             print "can not open file %s" % self.record
             exit()
-        
+
         for line in body:
             line = line.strip()
             if os.path.isfile(line):
@@ -72,4 +72,3 @@ class uninstall(Command):
         if not self.dont_remove_log:
             os.unlink(self.record)
             print self.record, "removed"
-

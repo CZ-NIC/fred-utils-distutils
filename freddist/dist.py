@@ -5,12 +5,12 @@ from distutils.dist import Distribution as _Distribution
 
 
 try:
-    from freddist.command.config import config 
+    from freddist.command.config import config
 except ImportError:
     from command.config import config
 
 try:
-    from freddist.command.build import build 
+    from freddist.command.build import build
 except ImportError:
     from command.build import build
 
@@ -45,7 +45,7 @@ except:
     from command.install_lib import install_lib
 
 try:
-    from freddist.command.sdist import sdist 
+    from freddist.command.sdist import sdist
 except ImportError:
     from command.sdist import sdist
 
@@ -86,7 +86,7 @@ class Distribution(_Distribution):
         self.srcdir = None
         self.rundir = None
         self.requires = None
-        
+
         # a structure for modification of files:
         # {"command": (("module.function", ("filename", ...)), ...), ...}
         self.modify_files = {}
@@ -128,7 +128,7 @@ class Distribution(_Distribution):
             self.cmdclass['clean'] = clean
         if not self.cmdclass.get('uninstall'):
             self.cmdclass['uninstall'] = uninstall
-        
+
         self.global_options.append(("fred-distutils-dir=", None,
                                     "Path to freddist module."))
 
@@ -182,6 +182,6 @@ class Distribution(_Distribution):
         elif os.path.isfile(os.path.join(self.srcdir, cfg_name)):
             # confir is inj source dir (where is the setup.py)
             files.append(os.path.join(self.srcdir, cfg_name))
-        
+
         return files
     # find_config_files ()

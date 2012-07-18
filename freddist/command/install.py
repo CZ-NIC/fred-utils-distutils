@@ -34,33 +34,33 @@ class install(_install, install_parent):
     #   compare: can be only >, >=, =, ==, <=, <
     #   attr/function: is module attribute or function returns the version
     #   value. This value is converted to string and than to LooseVersion obj.
-    
+
     DEPS_COMMAND = None
     # Format: (module_name, ...)
     # Example: ('xsltproc', 'xmllint')
-    
+
     DEPS_HELP = None
     # Format: {dist: {'module_name': 'package-name', ...}, ...}
     # Example:
     # DEPS_HELP = {
-    #    'rpm': {'django':    'Django', 
-    #            'PIL':       'PIL', }, 
-    #    'deb': {'django':    'python-django', 
+    #    'rpm': {'django':    'Django',
+    #            'PIL':       'PIL', },
+    #    'deb': {'django':    'python-django',
     #            'PIL':       'python-imaging', }}
-    
+
     DEPS_COMMAND_VERSION = None
     # Format: {module_name: ('compare number', 'shell command'), ...}
     # Example:
     # DEPS_COMMAND_VERSION = {
-    #    'xsltproc': (">= 10122", 
-    #                 "xsltproc --version | head -n 1 | awk '{print $5}'"), 
-    #    'xmllint': (">= 20631", 
+    #    'xsltproc': (">= 10122",
+    #                 "xsltproc --version | head -n 1 | awk '{print $5}'"),
+    #    'xmllint': (">= 20631",
     #                "xmllint 2>&1 --version | head -n 1 | awk '{print $NF}'"),
     #}
 
     DEPS_HELP_COMMAND = {
-        'rpm': 'yum install', 
-        'deb': 'apt-get install', 
+        'rpm': 'yum install',
+        'deb': 'apt-get install',
     }
 
     def __init__(self, *attrs):
@@ -87,7 +87,7 @@ class install(_install, install_parent):
         dist, help = None, {}
         if self.DEPS_HELP is None:
             return dist, help
-        
+
         if re.search('Ubuntu', sys.version):
             dist = 'deb'
         elif re.search('Fedora', sys.version):
@@ -138,11 +138,11 @@ class install(_install, install_parent):
     def __check_command_version(self, module_name, compare_version, command):
         "Check command version"
         module_version = os.popen(command).read().strip()
-        self.__do_version_comparation(module_name, 
+        self.__do_version_comparation(module_name,
                                       module_version, compare_version)
 
 
-    def __check_module_version(self, module, module_name, version_func, 
+    def __check_module_version(self, module, module_name, version_func,
                                compare_version):
         "Check module version"
         # Actual installed module version
@@ -151,19 +151,19 @@ class install(_install, install_parent):
             self.__missing_modules.append('Version Error: Version value was '
                     'not found in module %s.' % module_name)
         else:
-            self.__do_version_comparation(module_name, module_version, 
+            self.__do_version_comparation(module_name, module_version,
                                           compare_version)
 
 
-    def __do_version_comparation(self, module_name, module_version, 
+    def __do_version_comparation(self, module_name, module_version,
                                  compare_version):
         "Do version comparation"
         # parse version
         compare, version = self.__parse_compare_version(compare_version)
-        
+
         vers1 = LooseVersion(module_version)
         vers2 = LooseVersion(version)
-        
+
         if compare == '<':
             result = vers1 < vers2
         elif compare == '<=':
@@ -177,7 +177,7 @@ class install(_install, install_parent):
         else:
             result = None
             self.__missing_modules.append('Invalid comparation %s' % compare)
-        
+
         if not result:
             self.__missing_modules.append('Module %s %s is not in required '
                     'version %s.' % (module_name, vers1, vers2))
@@ -199,10 +199,10 @@ class install(_install, install_parent):
                 match = re.match('(\w+)\s+\((.+?)\)', item)
                 if match:
                     module_name, compare_version = match.groups()
-            
+
             module = self.__check_import_module(module_name)
             if module and compare_version:
-                self.__check_module_version(module, module_name, version_func, 
+                self.__check_module_version(module, module_name, version_func,
                                             compare_version)
 
 
@@ -224,25 +224,25 @@ class install(_install, install_parent):
     def check_dependencies(self):
         'Check application dependencies'
         self.__missing_modules = []
-        
+
         # check python modules
         self.check_mymodules()
         # check shell commands
         self.check_commands()
-        
+
         if len(self.__missing_modules):
             print >> sys.stderr, "Some required modules are missing or are "\
                         "not required version:"
             print >> sys.stderr, " ", "\n  ".join(self.__missing_modules)
             # get dict with help text for particular distribution
             dist, help = self.get_help4dist()
-            helptext = [name for name in self.__missing_modules 
+            helptext = [name for name in self.__missing_modules
                         if help.has_key(name)]
             if len(helptext):
                 print >> sys.stderr, "To install missing requirements " \
                         "log in as root and process following command:"
                 print >> sys.stderr, "%s %s" % (
-                        self.DEPS_HELP_COMMAND.get(dist, ''), 
+                        self.DEPS_HELP_COMMAND.get(dist, ''),
                         " ".join(helptext))
             raise SystemExit
 
@@ -252,6 +252,6 @@ class install(_install, install_parent):
 
         if self.no_check_deps is None:
             self.check_dependencies()
-    
+
         _install.run(self)
         self.normalize_record()

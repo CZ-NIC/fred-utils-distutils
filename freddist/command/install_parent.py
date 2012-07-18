@@ -10,27 +10,27 @@ class install_parent(Command):
 
     user_options = []
     boolean_options = []
-    
+
     PRESERVEPATH = True # constant for get_root(): self.get_root(self.PRESERVEPATH)
 
-    # Names of variables what will be copied into other classes 
+    # Names of variables what will be copied into other classes
     # (install_data, install_lib, install_script) by function finalize_options()
-    UNDEFINED_OPTIONS = ('root', 'prefix', 'record', 'bindir', 'sbindir', 
+    UNDEFINED_OPTIONS = ('root', 'prefix', 'record', 'bindir', 'sbindir',
         'sysconfdir', 'appconfdir', 'libexecdir', 'localstatedir', 'libdir',
-        'pythondir', 'purelibdir', 'datarootdir', 'datadir', 'infodir', 
+        'pythondir', 'purelibdir', 'datarootdir', 'datadir', 'infodir',
         'mandir', 'docdir', 'preservepath', 'no_record', 'no_pycpyo', 'no_mo',
-        'no_check_deps', 'fgen_setupcfg', 'no_update_setupcfg', 
-        'no_gen_setupcfg', 'no_setupcfg', 'setupcfg_template', 
-        'setupcfg_output', 'replace_path_rel', 'after_install', 
+        'no_check_deps', 'fgen_setupcfg', 'no_update_setupcfg',
+        'no_gen_setupcfg', 'no_setupcfg', 'setupcfg_template',
+        'setupcfg_output', 'replace_path_rel', 'after_install',
         'include_scripts')
 
     user_options.append(('bindir=', None,
         'user executables [PREFIX/bin]'))
     user_options.append(('sbindir=', None,
         'system admin executables [PREFIX/sbin]'))
-    user_options.append(('sysconfdir=', None, 
+    user_options.append(('sysconfdir=', None,
         'System configuration directory [PREFIX/etc]'))
-    user_options.append(('appconfdir=', None, 
+    user_options.append(('appconfdir=', None,
         'System configuration directory [fred] (sysconfdir/fred)'))
     user_options.append(('libexecdir=', None,
         'Program executables [PREFIX/libexec]'))
@@ -55,7 +55,7 @@ class install_parent(Command):
     user_options.append(('docdir=', None,
         'documentation root [DATAROOTDIR/doc/APPNAME]'))
 
-    user_options.append(('preservepath', None, 
+    user_options.append(('preservepath', None,
         'Preserve path(s) in configuration file(s).'))
     user_options.append(('no-record', None,
         'do not record list of installed files'))
@@ -84,8 +84,8 @@ class install_parent(Command):
         'Do everything required after install (syncdb, loaddata)'))
     user_options.append(('include-scripts', None,
         'Include scripts folder.'))
-    
-    
+
+
     boolean_options.append('preservepath')
     boolean_options.append('no_record')
     boolean_options.append('no_pycpyo')
@@ -129,7 +129,7 @@ class install_parent(Command):
                         or self.is_bdist_mode \
                   else \
                         self.root
-    
+
 
     def get_root(self, apply_preservepath=None):
         "Return aways root except if the parameter apply_preservepath is set."
@@ -139,41 +139,41 @@ class install_parent(Command):
         if apply_preservepath and (self.is_bdist_mode or self.preservepath):
             root = '' # reset root
         return root
-    
+
 
     def initialize_options(self):
-        self.prefix         = None
-        self.root           = None
-        
-        self.bindir         = None
-        self.sbindir        = None
-        self.sysconfdir     = None
-        self.appconfdir     = None
-        self.libexecdir     = None
-        self.localstatedir  = None
-        self.libdir         = None
-        self.pythondir      = None
-        self.purelibdir     = None
-        self.datarootdir    = None
-        self.datadir        = None
-        self.appdir         = None
-        self.infodir        = None
-        self.mandir         = None
-        self.docdir         = None
+        self.prefix = None
+        self.root = None
 
-        self.preservepath   = None
-        self.no_record      = None
-        self.no_pycpyo      = None
-        self.no_mo          = None
-        self.no_check_deps  = None
+        self.bindir = None
+        self.sbindir = None
+        self.sysconfdir = None
+        self.appconfdir = None
+        self.libexecdir = None
+        self.localstatedir = None
+        self.libdir = None
+        self.pythondir = None
+        self.purelibdir = None
+        self.datarootdir = None
+        self.datadir = None
+        self.appdir = None
+        self.infodir = None
+        self.mandir = None
+        self.docdir = None
 
-        self.fgen_setupcfg      = None
+        self.preservepath = None
+        self.no_record = None
+        self.no_pycpyo = None
+        self.no_mo = None
+        self.no_check_deps = None
+
+        self.fgen_setupcfg = None
         self.no_update_setupcfg = None
-        self.no_gen_setupcfg    = None
-        self.no_setupcfg        = None
-        self.setupcfg_template  = None
-        self.setupcfg_output    = None
-        self.replace_path_rel   = None
+        self.no_gen_setupcfg = None
+        self.no_setupcfg = None
+        self.setupcfg_template = None
+        self.setupcfg_output = None
+        self.replace_path_rel = None
         self.after_install = None
         self.fred_distutils_dir = None
         self.include_scripts = None
@@ -181,26 +181,26 @@ class install_parent(Command):
 
     def set_option_values(self):
         "Set values options"
-        
+
         if self.root and self.prefix and self.prefix[0] != '/':
             # prefix must start with slash if the root is set
             # otherwise the prefix is duplicated
             self.prefix = '/' + self.prefix
-        
+
         if not self.bindir:
             self.bindir = os.path.join(self.prefix, 'bin')
         if not self.sbindir:
             self.sbindir = os.path.join(self.prefix, 'sbin')
         if not self.sysconfdir:
             self.sysconfdir = os.path.join(self.prefix, 'etc')
-        
+
         if not self.appconfdir:
             # 'fred' or self.distribution.metadata.name
             self.appconfdir = os.path.join(self.sysconfdir, 'nicms_cfg')
         else:
             if self.appconfdir[0] != "/":
                 self.appconfdir = os.path.join(self.sysconfdir, self.appconfdir)
-        
+
         if not self.libexecdir:
             self.libexecdir = os.path.join(self.prefix, 'libexec')
         if not self.localstatedir:
@@ -208,7 +208,7 @@ class install_parent(Command):
         if not self.libdir:
             self.libdir = os.path.join(self.prefix, 'lib')
         if not self.pythondir:
-            self.pythondir = os.path.join(self.libdir, 'python%d.%d' % 
+            self.pythondir = os.path.join(self.libdir, 'python%d.%d' %
                     (sys.version_info[0], sys.version_info[1]))
         if not self.purelibdir:
             if 'install_lib' in self.distribution.command_options.get('install', {}):
@@ -261,7 +261,7 @@ class install_parent(Command):
         self.set_option_values()
 
 
-    def replace_pattern(self, fileOpen, fileSave=None, values = []):
+    def replace_pattern(self, fileOpen, fileSave=None, values=[]):
         """
         Replace given patterns with new values, for example in config files.
         Patterns and new values can contain regular expressions.
@@ -388,13 +388,13 @@ class install_parent(Command):
             open(self.record, 'w').writelines(record)
             print "record file has been updated"
 
-    
+
     def modify_file(self, command, filename, targetpath):
         "Modify file if any function is defined."
         if not hasattr(self.distribution, "modify_files"):
             return
-        
-        # modify_files: {"command": 
+
+        # modify_files: {"command":
         #                 (("module.function", ("filename", ...)), ...), ...}
         for mfncname, files in self.distribution.modify_files.get(command, []):
             modulename, fncname = mfncname.split(".")

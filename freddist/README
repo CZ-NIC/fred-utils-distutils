@@ -44,7 +44,6 @@ Known bugs:
  - install_data command crash when executed with `--prefix=.' option.
 
 Unknown bugs:
- 
+
  - other commands, explicitly not mentioned in this document or changed
    in source files, can be broken (as bdist_wininst in previous versions was).
-

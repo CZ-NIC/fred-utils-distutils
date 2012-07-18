@@ -66,7 +66,7 @@ class bdist_rpm(_bdist_rpm):
         'template file for setup.cfg [setup.cfg.template]'))
     user_options.append(('setupcfg-output=', None,
         'output file with setup configuration [setup.cfg]'))
-    
+
     boolean_options.append('dontpreservepath')
     boolean_options.append('no_join_opts')
     boolean_options.append('fgen_setupcfg')
@@ -82,14 +82,14 @@ class bdist_rpm(_bdist_rpm):
         self.dontpreservepath = None
         self.no_join_opts = None
 
-        self.fgen_setupcfg      = None
+        self.fgen_setupcfg = None
         self.no_update_setupcfg = None
-        self.no_gen_setupcfg    = None
-        self.no_setupcfg        = None
-        self.setupcfg_template  = None
-        self.setupcfg_output    = None
+        self.no_gen_setupcfg = None
+        self.no_setupcfg = None
+        self.setupcfg_template = None
+        self.setupcfg_output = None
         self.fred_distutils_dir = None
-        
+
         _bdist_rpm.initialize_options(self)
 
     #FREDDIST new method
@@ -115,7 +115,7 @@ class bdist_rpm(_bdist_rpm):
                 )
 
         self.srcdir = self.distribution.srcdir
-        
+
         self.set_undefined_options('bdist', ('bdist_base', 'bdist_base'))
         if self.rpm_base is None:
             if not self.rpm3_mode:
@@ -147,15 +147,15 @@ class bdist_rpm(_bdist_rpm):
         self.set_undefined_options('bdist', ('dist_dir', 'dist_dir'))
 
         #FREDDIST next 9 lines added
-        self.prep_script = self.joinsrcdir(self.prep_script) 
-        self.build_script = self.joinsrcdir(self.build_script) 
-        self.install_script = self.joinsrcdir(self.install_script) 
-        self.clean_script = self.joinsrcdir(self.clean_script) 
-        self.verify_script = self.joinsrcdir(self.verify_script) 
-        self.pre_install = self.joinsrcdir(self.pre_install) 
-        self.post_install = self.joinsrcdir(self.post_install) 
-        self.pre_uninstall = self.joinsrcdir(self.pre_uninstall) 
-        self.post_uninstall = self.joinsrcdir(self.post_uninstall) 
+        self.prep_script = self.joinsrcdir(self.prep_script)
+        self.build_script = self.joinsrcdir(self.build_script)
+        self.install_script = self.joinsrcdir(self.install_script)
+        self.clean_script = self.joinsrcdir(self.clean_script)
+        self.verify_script = self.joinsrcdir(self.verify_script)
+        self.pre_install = self.joinsrcdir(self.pre_install)
+        self.post_install = self.joinsrcdir(self.post_install)
+        self.pre_uninstall = self.joinsrcdir(self.pre_uninstall)
+        self.post_uninstall = self.joinsrcdir(self.post_uninstall)
 
         if not self.setupcfg_template:
             self.setupcfg_template = 'setup.cfg.template'
@@ -177,9 +177,9 @@ class bdist_rpm(_bdist_rpm):
         # definitions and headers
         spec_file = [
             '%define name ' + self.distribution.get_name(),
-            '%define version ' + self.distribution.get_version().replace('-','_'),
+            '%define version ' + self.distribution.get_version().replace('-', '_'),
             '%define unmangled_version ' + self.distribution.get_version(),
-            '%define release ' + self.release.replace('-','_'),
+            '%define release ' + self.release.replace('-', '_'),
             '',
             'Summary: ' + self.distribution.get_description(),
             ]
@@ -194,7 +194,7 @@ class bdist_rpm(_bdist_rpm):
         spec_file.extend([
             'Name: %{name}',
             'Version: %{version}',
-            'Release: %{release}',])
+            'Release: %{release}', ])
 
         # XXX yuck! this filename is available from the "sdist" command,
         # but only after it has run: and we create the spec file before
@@ -215,7 +215,7 @@ class bdist_rpm(_bdist_rpm):
             if not self.distribution.has_ext_modules():
                 spec_file.append('BuildArch: noarch')
         else:
-            spec_file.append( 'BuildArch: %s' % self.force_arch )
+            spec_file.append('BuildArch: %s' % self.force_arch)
 
         for field in ('Vendor',
                       'Packager',
@@ -265,7 +265,7 @@ class bdist_rpm(_bdist_rpm):
 
         # rpm scripts
         # figure out default build script
-        def_setup_call = "%s %s" % (self.python,os.path.basename(sys.argv[0]))
+        def_setup_call = "%s %s" % (self.python, os.path.basename(sys.argv[0]))
         def_build = "%s build" % def_setup_call
         if self.use_rpm_opt_flags:
             def_build = 'env CFLAGS="$RPM_OPT_FLAGS" ' + def_build
@@ -290,7 +290,7 @@ class bdist_rpm(_bdist_rpm):
              ("%s install "
               "-cO2 "
               "--root=$RPM_BUILD_ROOT "
-              "--record=INSTALLED_FILES %s") % 
+              "--record=INSTALLED_FILES %s") %
                (def_setup_call, self.install_extra_opts or '')),
             ('clean', 'clean_script', "rm -rf $RPM_BUILD_ROOT"),
             ('verifyscript', 'verify_script', None),
@@ -307,7 +307,7 @@ class bdist_rpm(_bdist_rpm):
             if val or default:
                 spec_file.extend([
                     '',
-                    '%' + rpm_opt,])
+                    '%' + rpm_opt, ])
                 if val:
                     print "read val"
                     spec_file.extend(string.split(open(val, 'r').read(), '\n'))
@@ -329,10 +329,9 @@ class bdist_rpm(_bdist_rpm):
         if self.changelog:
             spec_file.extend([
                 '',
-                '%changelog',])
+                '%changelog', ])
             spec_file.extend(self.changelog)
 
         return spec_file
 
     # _make_spec_file ()
-

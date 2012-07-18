@@ -59,7 +59,7 @@ class install_data(_install_data, install_parent):
         install_parent.__init__(self, *attrs)
         # cache for names of folders translated from proxy value
         self.config_dirs = {
-            'APPCONFDIR': None, 
+            'APPCONFDIR': None,
         }
 
 
@@ -77,7 +77,7 @@ class install_data(_install_data, install_parent):
         """
         keydir = dirname
         for strvalue in self.dir_patts:
-            spath = re.search("^"+strvalue, dirname)
+            spath = re.search("^" + strvalue, dirname)
             if spath:
                 if self.is_wininst:
                     self.is_wininst = False
@@ -87,11 +87,11 @@ class install_data(_install_data, install_parent):
                     self.is_wininst = True
                     return ret
                 dirname = self.getDir(strvalue.lower(), install_data.NOT_ADD_ROOT) + dirname[spath.end():]
-        
+
         # store translated value of the proxy dir
         if keydir in self.config_dirs.keys():
             self.config_dirs[keydir] = dirname
-        
+
         return dirname
 
     def initialize_options(self):
@@ -116,13 +116,13 @@ class install_data(_install_data, install_parent):
 
     def dont_overwrite(self, src, dest):
         "Check if is required the confirmation for overwriting the file"
-        
+
         # do NOT use confirmation:
-        
+
         if self.distribution.command_obj.get("bdist"):
             return False # always overwrite file
 
-        # rmp calls: python setup.py install -cO2 --root=$RPM_BUILD_ROOT 
+        # rmp calls: python setup.py install -cO2 --root=$RPM_BUILD_ROOT
         #                       --record=INSTALLED_FILES --preservepath
         inst = self.distribution.command_obj.get("install")
         if inst and inst.preservepath and inst.record == 'INSTALLED_FILES':
@@ -130,10 +130,10 @@ class install_data(_install_data, install_parent):
             return False # always overwrite file
 
         # USE confirmation:
-        
+
         # construct folders where are configuration files stored
         confpaths = [
-            self.root and os.path.join(self.root, path.lstrip(os.path.sep)) 
+            self.root and os.path.join(self.root, path.lstrip(os.path.sep))
             or path for path in self.config_dirs.values() if path is not None]
         configname = os.path.basename(src)
         if dest in confpaths:
@@ -156,7 +156,7 @@ class install_data(_install_data, install_parent):
       D    : show the difference between the versions
     Ctr+Z  : switch this process in the background (return back: 'fg')
  The default action is to keep the current version.
-*** %s (Y/I/N/O/D/Z) [default=N] ?""" % (destpath, configname), 
+*** %s (Y/I/N/O/D/Z) [default=N] ?""" % (destpath, configname),
                     answer = raw_input()
                     if answer == "" or answer in ("n", "N", "o", "O"):
                         return True # don't overwrite
@@ -165,7 +165,7 @@ class install_data(_install_data, install_parent):
                     if answer in ("d", "D"):
                         # display difference and
                         print os.popen("diff %s %s" % (src, destpath)).read()
-        
+
         return False # overwrite file
 
 
@@ -176,7 +176,7 @@ class install_data(_install_data, install_parent):
         if self.no_pycpyo:
             self.compile = 0
             self.optimize = 0
-        
+
         for filename in self.data_files:
             if type(filename) is types.StringType:
                 #FREDDIST next line changed
@@ -186,11 +186,11 @@ class install_data(_install_data, install_parent):
                     self.warn("setup script did not provide a directory for "
                               "'%s' -- installing right in '%s'" %
                               (filename, self.install_dir))
-                
+
                 # check if the confirmation is required
                 if self.dont_overwrite(filename, self.install_dir):
                     continue
-                
+
                 # it's a simple file, so copy it
                 (out, _) = self.copy_file(filename, self.install_dir)
                 self.outfiles.append(out)
@@ -232,11 +232,11 @@ class install_data(_install_data, install_parent):
                         if not os.path.exists(data):
                             data = util.convert_path(
                                     os.path.join(self.srcdir, data))
-                        
+
                         # check if the confirmation is required
                         if self.dont_overwrite(data, dirname):
                             continue
-                        
+
                         (out, _) = self.copy_file(data, dirname)
                         self.outfiles.append(out)
                         self.modify_file("install_data", data, dirname)
@@ -256,4 +256,3 @@ class install_data(_install_data, install_parent):
                                     py_compile.compile(\'%s\')"' % out)
                             self.outfiles.append(out + 'o')
                             print "creating optimized %s" % out + 'o'
-

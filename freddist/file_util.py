@@ -42,7 +42,7 @@ def all_files_in_4(dst_directory, directory, excludePattern=None,
         if not fit_pattern(filename, includePattern):
             continue
         full_path = os.path.join(directory, filename)
-        prefixx = full_path[full_path.find(directory)+len(directory)+1:]
+        prefixx = full_path[full_path.find(directory) + len(directory) + 1:]
 
 
         if os.path.isfile(full_path):
@@ -100,8 +100,8 @@ def all_files_in(dst_directory, directory, excludePattern=None,
         #elif os.path.isdir(curdir(full_path)) and recursive:
         elif os.path.isdir(full_path) and recursive:
             paths.extend(all_files_in(dst_directory, full_path, excludePattern,
-                includePattern, recursive, cutSlashes_dst, cutSlashes_dir))   
-           
+                includePattern, recursive, cutSlashes_dst, cutSlashes_dir))
+
     return paths
 
 
@@ -155,15 +155,15 @@ def all_files_in_2(directory, excludePattern=None, includePattern=None,
     return paths
 
 
-def all_subpackages_in(folder, omit_name = 'build'):
+def all_subpackages_in(folder, omit_name='build'):
     'Returns all subpackages (packages in subdirectories) (recursive)'
     subpackages = set()
-    
+
     name = folder.replace(os.path.sep, '.').strip('.')
     if name == omit_name:
         # omit build folder, the name of folder could be changed by --bdist-base (-b)
         return subpackages
-    
+
     for filename in os.listdir(folder):
         path = os.path.join(folder, filename)
         if os.path.isdir(path) and filename[0] != ".":
@@ -191,14 +191,14 @@ def subpackages(root, folder):
 def collect_data_files(srcdir, data, strip_left_folder=None):
     "Returns a list of paths and filenames for variable data_files"
     data_files = []
-    
+
     # functions which supports collect filenames in folders
     is_svn = re.compile('.svn')
-    
+
     # if the path of setup.py is different than the current path
     # we need strip this part of path
-    strippath = len(srcdir)+1 if len(srcdir) else 0
-    
+    strippath = len(srcdir) + 1 if len(srcdir) else 0
+
     def collect_folder_files(prefix, folder):
         for root, dirs, files in os.walk(folder):
             if is_svn.search(root):
@@ -208,7 +208,7 @@ def collect_data_files(srcdir, data, strip_left_folder=None):
                 root = root[strippath:]
 
             # strip backups
-            project_files = [os.path.join(root, name) 
+            project_files = [os.path.join(root, name)
                              for name in files if name[-1] != '~']
             if len(project_files):
                 if strip_left_folder:
@@ -217,7 +217,7 @@ def collect_data_files(srcdir, data, strip_left_folder=None):
                     chops = root.strip('/').split('/')
                     root = '' if len(chops) < 2 else os.path.join(*chops[1:])
                 data_files.append((os.path.join(prefix, root), project_files))
-    
+
     for prefix, folder in data:
         collect_folder_files(prefix, os.path.join(srcdir, folder))
     return data_files
@@ -229,14 +229,14 @@ if __name__ == '__main__':
         # test
         print "all_subpackages_in"
         print all_subpackages_in(sys.argv[1])
-        print '-'*30
-        
+        print '-' * 30
+
         for suffix in ('', '_2', '_3', '_4'):
             name = 'all_files_in%s' % suffix
             print name
             for item in locals()[name](sys.argv[2], sys.argv[1]):
                 print item
-            print '-'*30
-    
+            print '-' * 30
+
     else:
         print 'Test functions\nUsage: python file_util.py src/folder dest/folder'
