@@ -1,7 +1,9 @@
 import os
-from distutils.dir_util import remove_tree
+
 from distutils import log
 from distutils.command.clean import clean as _clean
+from distutils.dir_util import remove_tree
+
 
 class clean(_clean):
     user_options = []
@@ -39,7 +41,3 @@ class clean(_clean):
         if os.path.exists(self.manifest):
             os.remove(self.manifest)
             log.info("%s removed" % self.manifest)
-
-        if os.path.exists('setup.cfg'):
-            os.remove('setup.cfg')
-            log.info("%s removed" % 'setup.cfg')

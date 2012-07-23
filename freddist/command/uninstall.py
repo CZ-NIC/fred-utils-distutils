@@ -3,7 +3,6 @@ freddist.command.uninstall
 
 Implements the freddist 'uninstall' command.
 """
-
 # There is no uninstall command in classic distutils, so we added it.
 # Command class is pretty simple. Uninstall expect `install.log' file in
 # directory from which is executed. Or you can use `--record' option to set
@@ -14,9 +13,10 @@ Implements the freddist 'uninstall' command.
 
 # TODO uninstall command do not work when installing to different root
 # (param --root is used)
-
 import os
+
 from distutils.core import Command
+
 
 class uninstall(Command):
 

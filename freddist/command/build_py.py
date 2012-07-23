@@ -1,6 +1,7 @@
+import os
+import re
 import sys
-import string, os, re
-#from types import StringType
+
 from distutils.command.build_py import build_py as _build_py
 
 
@@ -18,7 +19,7 @@ class build_py(_build_py):
         So Build_py class implements this funkcionality. This code
         is from http://lists.mysql.com/ndb-connectors/617
         """
-        path = string.split(package, '.')
+        path = package.split('.')
 
         if not self.package_dir:
             if path:
@@ -31,7 +32,7 @@ class build_py(_build_py):
             tail = []
             while path:
                 try:
-                    pdir = self.package_dir[string.join(path, '.')]
+                    pdir = self.package_dir['.'.join(path)]
                 except KeyError:
                     tail.insert(0, path[-1])
                     del path[-1]
@@ -59,7 +60,6 @@ class build_py(_build_py):
                     return self.srcdir
     #get_package_dir()
 
-
     def modify_file(self, command, filename, targetpath):
         "Modify file if any function is defined."
         if not hasattr(self.distribution, "modify_files"):
@@ -78,24 +78,21 @@ class build_py(_build_py):
                     # modify file by fnc(SRC, DEST) from SRC to DEST
                     fnc(filename, os.path.join(targetpath, name))
 
-
     def build_module (self, module, module_file, package):
         "Extend build_module by modification files"
         # do original function
         retval = _build_py.build_module(self, module, module_file, package)
         #if type(package) is StringType:
         if isinstance(package, str):
-            package = string.split(package, '.')
+            package = package.split('.')
         outfile = self.get_module_outfile(self.build_lib, package, module)
         # extend by modify file if is defined
         self.modify_file("build_py", module_file, os.path.dirname(outfile))
         return retval
 
-
     def build_package_data (self):
         """Copy data files into build directory"""
-        lastdir = None
-        for package, src_dir, build_dir, filenames in self.data_files:
+        for dummy_package, src_dir, build_dir, filenames in self.data_files:
             for filename in filenames:
                 source = os.path.join(src_dir, filename)
                 target = os.path.join(build_dir, filename)
@@ -114,7 +111,3 @@ class build_py(_build_py):
         if 'no_mo' not in self.distribution.get_option_dict('install'):
             from freddist.util import pomo_compile
             pomo_compile(files)
-
-
-    def run(self):
-        _build_py.run(self)

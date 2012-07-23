@@ -1,9 +1,11 @@
-import re, os, sys
-from distutils.command.install_scripts import install_scripts as _install_scripts
-from install_parent import install_parent
-from stat import ST_MODE
-from distutils.core import Command
+import os
+import sys
+
 from distutils import log
+from distutils.command.install_scripts import install_scripts as _install_scripts
+
+from freddist.command.install_parent import install_parent
+
 
 class install_scripts(_install_scripts, install_parent):
 
@@ -41,22 +43,21 @@ class install_scripts(_install_scripts, install_parent):
         # necessary for function get_outputs()
         self.outfiles = []
 
-
     def run(self):
         self.install_dir = self.getDir_nop('bindir')
 
         if not self.no_pycpyo:
             files = os.listdir(self.build_dir)
-            for file in files:
+            for filename in files:
                 #file = os.path.join(self.build_dir, file)
-                if file.endswith('.py') and self.compile == 1:
+                if filename.endswith('.py') and self.compile == 1:
                     os.system('python -c "import py_compile; \
-                            py_compile.compile(\'%s\')"' % os.path.join(self.build_dir, file))
-                    print "creating compiled %s" % file + 'c'
-                if file.endswith('.py') and self.optimize == 1:
+                            py_compile.compile(\'%s\')"' % os.path.join(self.build_dir, filename))
+                    print "creating compiled %s" % filename + 'c'
+                if filename.endswith('.py') and self.optimize == 1:
                     os.system('python -O -c "import py_compile; \
-                            py_compile.compile(\'%s\')"' % os.path.join(self.build_dir, file))
-                    print "creating optimized %s" % file + 'o'
+                            py_compile.compile(\'%s\')"' % os.path.join(self.build_dir, filename))
+                    print "creating optimized %s" % filename + 'o'
         if not self.skip_build:
             self.run_command('build_scripts')
 

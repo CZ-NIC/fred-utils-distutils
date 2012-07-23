@@ -3,9 +3,9 @@
 Miscellaneous utility functions -- anything that doesn't fit into
 one of the other *util.py modules.
 """
-import sys
-import os
 import codecs
+import os
+import sys
 
 from distutils import log
 try:
@@ -14,7 +14,6 @@ try:
 except ImportError:
     # distutils version 2.5.1
     from distutils.errors import CompileError as DistutilsByteCompileError
-
 
 
 def pomo_compile(files):

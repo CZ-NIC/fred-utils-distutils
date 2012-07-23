@@ -1,12 +1,15 @@
-import os, types, sys, string
-from glob import glob
-from distutils import dep_util, log, dir_util
-from distutils.text_file import TextFile
-from distutils.command.sdist import sdist as _sdist
-from distutils.errors import *
+import os
+import types
 
-sys.path.append('..')
+from glob import glob
+
+from distutils import dep_util, log, dir_util
+from distutils.command.sdist import sdist as _sdist
+from distutils.errors import DistutilsTemplateError
+from distutils.text_file import TextFile
+
 from freddist.filelist import FileList
+
 
 class sdist(_sdist):
 
@@ -16,7 +19,6 @@ class sdist(_sdist):
     boolean_options = ['create-manifest-in']
 
     def initialize_options(self):
-        self.fred_distutils_dir = None
         _sdist.initialize_options(self)
         self.create_manifest_in = False
 
@@ -80,7 +82,7 @@ class sdist(_sdist):
                           self.template)
             #FREDDIST changes in next six lines
             self.filelist.findall(self.srcdir)
-            if self.srcdir == os.curdir:
+            if os.path.abspath(self.srcdir) == os.curdir:
                 for i in range(len(self.filelist.allfiles)):
                     self.filelist.allfiles[i] = os.path.join(
                             self.srcdir, self.filelist.allfiles[i])
@@ -127,24 +129,24 @@ class sdist(_sdist):
             os.path.join(self.srcdir, 'README.txt')),
             self.distribution.script_name]
 
-        for fn in standards:
-            if type(fn) is types.TupleType:
-                alts = fn
+        for filename in standards:
+            if type(filename) is types.TupleType:
+                alts = filename
                 got_it = 0
-                for fn in alts:
-                    if os.path.exists(fn):
+                for filename in alts:
+                    if os.path.exists(filename):
                         got_it = 1
-                        self.filelist.append(fn)
+                        self.filelist.append(filename)
                         break
 
                 if not got_it:
                     self.warn("standard file not found: should have one of " +
-                              string.join(alts, ', '))
+                              ', '.join(alts, ))
             else:
-                if os.path.exists(fn):
-                    self.filelist.append(fn)
+                if os.path.exists(filename):
+                    self.filelist.append(filename)
                 else:
-                    self.warn("standard file '%s' not found" % fn)
+                    self.warn("standard file '%s' not found" % filename)
 
         #FREDDIST self.srcdir added
         optional = [
@@ -235,9 +237,9 @@ class sdist(_sdist):
         """
         #same as files but with striped full path
         files_wo_path = []
-        for file in files:
+        for filename in files:
             #FREDDIST self.srcdir added
-            files_wo_path.append(file[len(self.srcdir) + 1:])
+            files_wo_path.append(filename[len(self.srcdir) + 1:])
         # Create all the directories under 'base_dir' necessary to
         # put 'files' there; the 'mkpath()' is just so we don't die
         # if the manifest happens to be empty.
@@ -264,13 +266,13 @@ class sdist(_sdist):
             log.warn("no files to distribute -- empty manifest?")
         else:
             log.info(msg)
-        for file in files:
-            if not os.path.isfile(file):
-                log.warn("'%s' not a regular file -- skipping" % file)
+        for filename in files:
+            if not os.path.isfile(filename):
+                log.warn("'%s' not a regular file -- skipping" % filename)
             else:
                 #FREDDIST self.srcdir added
-                dest = os.path.join(base_dir, file[len(self.srcdir) + 1:])
-                self.copy_file(file, dest, link=link)
+                dest = os.path.join(base_dir, filename[len(self.srcdir) + 1:])
+                self.copy_file(filename, dest, link=link)
 
         #copy setup.cfg into base_dir (because in base_dir is now setup.cfg
         #from srcdir directory
@@ -351,9 +353,9 @@ class sdist(_sdist):
 
         archive_files = []              # remember names of files we create
         for fmt in self.formats:
-            file = self.make_archive(base_name, fmt, base_dir=base_dir)
-            archive_files.append(file)
-            self.distribution.dist_files.append(('sdist', '', file))
+            filename = self.make_archive(base_name, fmt, base_dir=base_dir)
+            archive_files.append(filename)
+            self.distribution.dist_files.append(('sdist', '', filename))
 
         self.archive_files = archive_files
 

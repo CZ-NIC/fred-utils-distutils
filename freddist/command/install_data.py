@@ -1,7 +1,13 @@
-import types, os, re, sys, filecmp
+import filecmp
+import os
+import re
+import sys
+import types
+
 from distutils import util
 from distutils.command.install_data import install_data as _install_data
-from install_parent import install_parent
+
+from freddist.command.install_parent import install_parent
 
 # freddist install_data came with one enhancement. It regards system directories.
 # And first simple example. This is part of core.setup function:
