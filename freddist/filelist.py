@@ -3,27 +3,44 @@
 Provides the FileList class, used for poking about the filesystem
 and building lists of files.
 """
-
-
-__revision__ = "$Id: filelist.py 37828 2004-11-10 22:23:15Z loewis $"
-
-
 import os
+
 from distutils.filelist import FileList as _FileList
 
 
+def _strip_directory(filename, directory):
+    """
+    Strips directory from filename, if file is in directory or its subdirectories.
+    """
+    if filename.startswith(directory):
+        return os.path.relpath(filename, directory)
+    else:
+        return filename
+
+
 class FileList(_FileList):
+    """
+    A list of filenames relative to source directory.
+    """
     def __init__(self,
                  warn=None,
                  debug_print=None,
                  srcdir=None):
         _FileList.__init__(self, warn, debug_print)
-        self.srcdir = srcdir
+        self.srcdir = os.path.realpath(srcdir)
 
-    # -- Filtering/selection methods -----------------------------------
+    def findall(self, dir=None):
+        # Use source directory as default
+        _FileList.findall(self, dir or self.srcdir)
+        # And store paths relatively to source directory
+        self.allfiles = [os.path.relpath(f, self.srcdir) for f in self.allfiles]
 
-    def include_pattern (self, pattern,
-                         anchor=1, prefix=None, is_regex=0):
-        if prefix:
-            prefix = os.path.join(self.srcdir, prefix)
-        return _FileList.include_pattern(self, pattern, anchor, prefix, is_regex)
+    # -- List-like methods ---------------------------------------------
+
+    def append (self, item):
+        # Store paths relatively to source directory
+        _FileList.append(self, _strip_directory(item, self.srcdir))
+
+    def extend (self, items):
+        # Store paths relatively to source directory
+        _FileList.extend(self, (_strip_directory(i, self.srcdir) for i in items))

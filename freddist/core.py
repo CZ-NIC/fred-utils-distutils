@@ -20,5 +20,7 @@ def setup(**attrs):
         attrs['version'] = get_git_version(srcdir)
     # Set default Distribution class
     attrs.setdefault('distclass', Distribution)
+    # Set default script_name full
+    attrs.setdefault('script_name', sys.argv[0])
     # Call original 'setup()'
     _setup(**attrs)
