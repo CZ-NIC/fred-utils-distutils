@@ -16,30 +16,21 @@ from distutils.command.bdist_rpm import bdist_rpm as _bdist_rpm
 #   and so on.
 #
 class bdist_rpm(_bdist_rpm):
-    user_options = _bdist_rpm.user_options
-    boolean_options = _bdist_rpm.boolean_options
-
-    user_options.append(('build-extra-opts=', 'b',
-        'extra option(s) passed to build command'))
-    user_options.append(('install-extra-opts=', 'i',
-        'extra option(s) passed to install command'))
-    user_options.append(('dontpreservepath', None,
-        'do not automatically append `--preservepath\'\
-        option to `install-extra-opts\''))
-
-    boolean_options.append('dontpreservepath')
+    user_options = _bdist_rpm.user_options + [
+        ('build-extra-opts=', 'b',
+         "extra option(s) passed to build command"),
+        ('install-extra-opts=', 'i',
+         "extra option(s) passed to install command"),
+    ]
 
     def initialize_options(self):
         self.build_extra_opts = None
         self.install_extra_opts = None
-        self.dontpreservepath = None
 
         _bdist_rpm.initialize_options(self)
 
     def finalize_options(self):
-        self.srcdir = self.distribution.srcdir
         self.set_undefined_options('bdist',
-                ('dontpreservepath', 'dontpreservepath'),
                 ('build_extra_opts', 'build_extra_opts'),
                 ('install_extra_opts', 'install_extra_opts'),
         )
@@ -53,7 +44,7 @@ class bdist_rpm(_bdist_rpm):
             if filename is None or os.path.isabs(filename):
                 # We can not do anything
                 continue
-            abs_path = os.path.join(self.srcdir, filename)
+            abs_path = os.path.join(self.distribution.srcdir, filename)
             if not os.path.isfile(filename) and os.path.isfile(abs_path):
                 setattr(self, script, abs_path)
 
@@ -86,11 +77,9 @@ class bdist_rpm(_bdist_rpm):
             install_script_file = NamedTemporaryFile(prefix='install_script')
             self.install_script = install_script_file.name
 
-            def_install = "%s install -cO2 --root=$RPM_BUILD_ROOT --record=INSTALLED_FILES" % def_setup_call
+            def_install = "%s install -cO2 --force --root=$RPM_BUILD_ROOT --record=INSTALLED_FILES" % def_setup_call
             if self.install_extra_opts:
                 def_install = '%s %s' % (def_install, self.install_extra_opts.strip())
-            if '--preservepath' not in def_install:
-                def_install += ' --preservepath'
             install_script_file.write(def_install)
             install_script_file.write('\n')
             # This is trick, so the file can be opened and read while we still have it opened.

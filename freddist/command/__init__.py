@@ -1,0 +1,13 @@
+__all__ = ['bdist',
+           'bdist_deb',
+           'bdist_rpm',
+           'build',
+           'build_i18n',
+           'build_py',
+           'build_scripts',
+           'clean',
+           'install',
+           'install_data',
+           'install_lib',
+           'sdist',
+           'uninstall']

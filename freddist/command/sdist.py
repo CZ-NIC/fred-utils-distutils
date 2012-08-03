@@ -12,10 +12,12 @@ from freddist.filelist import FileList
 
 
 class sdist(_sdist):
-    user_options = _sdist.user_options
-    user_options.append(('create-manifest-in', None, 'Create file MANIFEST.in'))
+    user_options = _sdist.user_options + [
+        ('create-manifest-in', None,
+         "Create file MANIFEST.in"),
+    ]
 
-    boolean_options = ['create-manifest-in']
+    boolean_options = _sdist.boolean_options + ['create-manifest-in']
 
     def initialize_options(self):
         _sdist.initialize_options(self)
@@ -23,14 +25,13 @@ class sdist(_sdist):
 
     def finalize_options(self):
         _sdist.finalize_options(self)
-        self.srcdir = self.distribution.srcdir
-        self.template = os.path.join(self.srcdir, self.template)
+        self.template = os.path.join(self.distribution.srcdir, self.template)
 
     def run(self):
         #FREDDIST: Use different FileList
         # 'filelist' contains the list of files that will make up the
         # manifest
-        self.filelist = FileList(srcdir=self.srcdir)
+        self.filelist = FileList(srcdir=self.distribution.srcdir)
 
         # Ensure that all required meta-data is given; warn if not (but
         # don't die, it's not *that* serious!)
@@ -77,7 +78,7 @@ class sdist(_sdist):
                 got_it = 0
                 for fn in alts:
                     #FREDDIST: create full path
-                    fn = os.path.join(self.srcdir, fn)
+                    fn = os.path.join(self.distribution.srcdir, fn)
                     if os.path.exists(fn):
                         got_it = 1
                         self.filelist.append(fn)
@@ -88,7 +89,7 @@ class sdist(_sdist):
                               string.join(alts, ', '))
             else:
                 #FREDDIST: create full path
-                fn = os.path.join(self.srcdir, fn)
+                fn = os.path.join(self.distribution.srcdir, fn)
                 if os.path.exists(fn):
                     self.filelist.append(fn)
                 else:
@@ -98,7 +99,7 @@ class sdist(_sdist):
         optional = ['test/test*.py', 'setup.cfg', 'RELEASE-VERSION']
         for pattern in optional:
             #FREDDIST: create full path
-            pattern = os.path.join(self.srcdir, pattern)
+            pattern = os.path.join(self.distribution.srcdir, pattern)
             files = filter(os.path.isfile, glob(pattern))
             if files:
                 self.filelist.extend(files)
@@ -124,7 +125,7 @@ class sdist(_sdist):
                 if isinstance(item, str): # plain file
                     item = convert_path(item)
                     #FREDDIST: create full path
-                    item = os.path.join(self.srcdir, item)
+                    item = os.path.join(self.distribution.srcdir, item)
                     if os.path.isfile(item):
                         self.filelist.append(item)
                 else:    # a (dirname, filenames) tuple
@@ -132,7 +133,7 @@ class sdist(_sdist):
                     for f in filenames:
                         f = convert_path(f)
                         #FREDDIST: create full path
-                        f = os.path.join(self.srcdir, f)
+                        f = os.path.join(self.distribution.srcdir, f)
                         if os.path.isfile(f):
                             self.filelist.append(f)
 
@@ -147,6 +148,11 @@ class sdist(_sdist):
         if self.distribution.has_scripts():
             build_scripts = self.get_finalized_command('build_scripts')
             self.filelist.extend(build_scripts.get_source_files())
+
+        #FREDDIST: add i18n files
+        if self.distribution.has_i18n_files():
+            build_i18n = self.get_finalized_command('build_i18n')
+            self.filelist.extend(build_i18n.get_source_files())
 
     def make_release_tree (self, base_dir, files):
         """Create the directory tree that will become the source
@@ -183,7 +189,7 @@ class sdist(_sdist):
             log.info(msg)
         for file in files:
             #FREDDIST: create full filename
-            src = os.path.join(self.srcdir, file)
+            src = os.path.join(self.distribution.srcdir, file)
             if not os.path.isfile(src):
                 log.warn("'%s' not a regular file -- skipping" % file)
             else:

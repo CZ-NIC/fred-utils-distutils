@@ -1,264 +1,115 @@
 import filecmp
 import os
-import re
-import sys
-import types
 
-from distutils import util
+from subprocess import check_call
+from types import StringType
+
 from distutils.command.install_data import install_data as _install_data
-
-from freddist.command.install_parent import install_parent
-
-# freddist install_data came with one enhancement. It regards system directories.
-# And first simple example. This is part of core.setup function:
-#
-# 01     setup(name='some_name',
-# 02             author='your name',
-# 03             #important part goes now
-# 04             data_files = [
-# 05                 ('SYSCONFDIR/some_name',
-# 06                     [
-# 07                         'file_no1.conf',
-# 08                         'file_no2.conf'
-# 09                     ]
-# 10                 ),
-# 11                 ('DOCDIR',
-# 12                     [
-# 13                         'document_no1.html'
-# 14                     ]
-# 15                 ),
-# 16                 ('LOCALSTATEDIR/whatever', ),
-# 17             ],
-# 18             another setup stuff....,
-#
-# As you can see, in data_files is used some strange `SYSCONFDIR' and `DOCDIR'
-# option. These are during install phase replaced by fully expanded directory
-# names. For example `file_no1.conf' and `file_no2.conf' will be installed into
-# `PREFIX/etc/some_name' directory. And since `PREFIX' is normally `/usr/local'
-# then full path to first file will be `/usr/local/etc/some_name/file_no1.conf'.
-# All these setting can be overriden by proper options.
-# On line 16 is example of creating empty directory.
+from distutils.util import subst_vars, change_root
 
 
-class install_data(_install_data, install_parent):
+class install_data(_install_data):
+    """
+    Data files can be inserted with replacement strings.
 
-    user_options = _install_data.user_options + install_parent.user_options
-    boolean_options = _install_data.boolean_options + install_parent.boolean_options
+    data_files = [
+        ('$sysconf', ('file.conf', )),
+        ('$data/share', ('static.file', )),
+    ]
 
-    user_options.append(('root=', None,
-        'install everything relative to this alternate root directory'))
-    user_options.append(('prefix=', None,
-        'installation prefix'))
-
-    NOT_ADD_ROOT = 1
-
-    # directory patterns which install_data recognize
-    dir_patts = ['PREFIX', 'SYSCONFDIR', 'APPCONFDIR', 'LOCALSTATEDIR', 'LIBEXECDIR',
-            'LIBDIR', 'DATAROOTDIR', 'DATADIR', 'MANDIR', 'DOCDIR',
-            'INFODIR', 'SBINDIR', 'BINDIR', 'PYTHONDIR',
-            'PURELIBDIR', 'APPDIR', 'SRCDIR']
-
-    def __init__(self, *attrs):
-        self.compile = 1
-        self.optimize = 1
-        _install_data.__init__(self, *attrs)
-        install_parent.__init__(self, *attrs)
-        # cache for names of folders translated from proxy value
-        self.config_dirs = {
-            'APPCONFDIR': None,
-        }
-
-
-    def replaceSpecialDir(self, dirname):
-        """
-        Method purpose is to replace `special directory' pattern passed to
-        freddist.core.setup function in its data_files list. For example
-        data_files could look like this:
-            data_files = [('SYSCONFDIR/some_dir', ['file_no1', 'file_no2'])]
-        In this example `file_no1' and `file_no2' will be copied into
-        `SYSCONFDIR/some_dir' directory where `SYSCONFDIR' will be replaced
-        with actual setting (by default it is `prefix/etc' where prefix is
-        `/usr/local'. So whole path will be `/usr/local/etc/some_dir').
-        Valid patterns are emplaced in self.`dir_patts' variable.
-        """
-        keydir = dirname
-        for strvalue in self.dir_patts:
-            spath = re.search("^" + strvalue, dirname)
-            if spath:
-                if self.is_wininst:
-                    self.is_wininst = False
-                    ret = os.path.join(self.getDir_noprefix(strvalue.lower()), dirname[spath.end():].lstrip(os.path.sep))
-                    if strvalue in ('SYSCONFDIR', 'APPCONFDIR'):
-                        ret = "+" + ret
-                    self.is_wininst = True
-                    return ret
-                dirname = self.getDir(strvalue.lower(), install_data.NOT_ADD_ROOT) + dirname[spath.end():]
-
-        # store translated value of the proxy dir
-        if keydir in self.config_dirs.keys():
-            self.config_dirs[keydir] = dirname
-
-        return dirname
+    To change replacements, pass options to `install` command.
+    """
+    #TODO: Is it possible to use install_data on its own with all replacements?
+    # Do not be confused, it is not easy to do so.
+    user_options = _install_data.user_options + [
+        ('sysconf_dir=', None,
+         "installation directory for configuration files"),
+    ]
 
     def initialize_options(self):
         _install_data.initialize_options(self)
-        install_parent.initialize_options(self)
-        self.prefix = None
-        self.root = None
-        self.record = None
+        self.sysconf_dir = None
+
+        # File path replacements
+        self.config_dirs = None
 
     def finalize_options(self):
         _install_data.finalize_options(self)
-        if 'install' in sys.argv:
-            self.set_undefined_options('install', *[(k, k) for k in self.UNDEFINED_OPTIONS])
-        else:
-            install_parent.finalize_options(self)
-        self.set_directories(self.prefix)
-        if not self.record and not self.no_record:
-            self.record = 'install.log'
-        self.srcdir = self.distribution.srcdir
-        self.rundir = self.distribution.rundir
 
+        # Get file path replacements from `install` command
+        self.set_undefined_options('install',
+           ('config_dirs', 'config_dirs'),
+           ('install_sysconf', 'sysconf_dir'),
+        )
 
-    def dont_overwrite(self, src, dest):
-        "Check if is required the confirmation for overwriting the file"
+        # Convert data files
+        self._expand_data_files()
 
-        # do NOT use confirmation:
-
-        if self.distribution.command_obj.get("bdist"):
-            return False # always overwrite file
-
-        # rmp calls: python setup.py install -cO2 --root=$RPM_BUILD_ROOT
-        #                       --record=INSTALLED_FILES --preservepath
-        inst = self.distribution.command_obj.get("install")
-        if inst and inst.preservepath and inst.record == 'INSTALLED_FILES':
-            # do not use confirmation during creation the RMP package
-            return False # always overwrite file
-
-        # USE confirmation:
-
-        # construct folders where are configuration files stored
-        confpaths = [
-            self.root and os.path.join(self.root, path.lstrip(os.path.sep))
-            or path for path in self.config_dirs.values() if path is not None]
-        configname = os.path.basename(src)
-        if dest in confpaths:
-            # destination is in folder where config files are,
-            # so we check if it is not duplicity
-            destpath = os.path.join(dest, configname)
-            # if file exists and is not same
-            if os.path.isfile(destpath) and not filecmp.cmp(src, destpath):
-
-                if self.force:
-                    return False # overwrite file in the bash mode (--force)
-
-                while 1:
-                    print """Configuration file `%s'
- ==> Since the installation was changed (by you or the script).
- ==> Distribution offers modified version.
-   What do you do? Possible options are:
-    Y or I : install the package version
-    N or O : keep the current version
-      D    : show the difference between the versions
-    Ctr+Z  : switch this process in the background (return back: 'fg')
- The default action is to keep the current version.
-*** %s (Y/I/N/O/D/Z) [default=N] ?""" % (destpath, configname),
-                    answer = raw_input()
-                    if answer == "" or answer in ("n", "N", "o", "O"):
-                        return True # don't overwrite
-                    if answer in ("y", "Y", "i", "I"):
-                        break # overwrite file
-                    if answer in ("d", "D"):
-                        # display difference and
-                        print os.popen("diff %s %s" % (src, destpath)).read()
-
-        return False # overwrite file
-
-
-    def run(self):
-        #FREDDIST line added
-        #self.mkpath(self.install_dir) # $root/$prefix/local for scheme 'unix_local'
-
-        if self.no_pycpyo:
-            self.compile = 0
-            self.optimize = 0
-
-        for filename in self.data_files:
-            if type(filename) is types.StringType:
-                #FREDDIST next line changed
-                if not os.path.exists(filename):
-                    filename = util.convert_path(os.path.join(self.srcdir, filename))
-                if self.warn_dir:
-                    self.warn("setup script did not provide a directory for "
-                              "'%s' -- installing right in '%s'" %
-                              (filename, self.install_dir))
-
-                # check if the confirmation is required
-                if self.dont_overwrite(filename, self.install_dir):
-                    continue
-
-                # it's a simple file, so copy it
-                (out, _) = self.copy_file(filename, self.install_dir)
-                self.outfiles.append(out)
-                self.modify_file("install_data", filename, self.install_dir)
-
-                if out.endswith('.py') and self.compile == 1:
-                    os.system('python -c "import py_compile; \
-                            py_compile.compile(\'%s\')"' % out)
-                    self.outfiles.append(out)
-                    print "creating compiled %s" % out + 'c'
-                if out.endswith('.py') and self.optimize == 1:
-                    os.system('python -O -c "import py_compile; \
-                            py_compile.compile(\'%s\')"' % out)
-                    self.outfiles.append(out)
-                    print "creating optimized %s" % out + 'o'
+    def _expand_data_files(self):
+        """
+        Expand variables in destination directories and joins source paths with source directory.
+        """
+        data_files = []
+        for f in self.data_files:
+            if type(f) is StringType:
+                # Replace single file with tuple
+                data_files.append(os.path.dirname(f), os.path.join(self.distribution.srcdir, f))
             else:
-                # it's a tuple with path to install to and a list of files
-                dirname = util.convert_path(self.replaceSpecialDir(filename[0]))
+                dest, files = f
+                data_files.append((self.expand_filename(dest),
+                                   [os.path.join(self.distribution.srcdir, f) for f in files]))
+        self.data_files = data_files
 
-                if not os.path.isabs(dirname):
-                    if self.is_wininst and dirname[0] == '+':
-                        dirname = os.path.join(self.install_dir[:self.install_dir.rfind(os.path.sep)], dirname[1:])
-                    else:
-                        dirname = os.path.join(self.install_dir, dirname)
-                elif self.root:
-                    dirname = util.change_root(self.root, dirname)
-                self.mkpath(dirname)
+    def expand_filename(self, filename):
+        new_filename = subst_vars(filename, self.config_dirs)
+        # Make paths with replacements absolute
+        if filename.startswith('$'):
+            new_filename = change_root('/', new_filename)
+        return new_filename
 
-                if len(filename) == 1 or filename[1] == []:
-                    # If there are no files listed, the user must be
-                    # trying to create an empty directory, so add the
-                    # directory to the list of output files.
-                    self.outfiles.append(dirname)
-                    print "creating directory %s" % dirname
-                else:
-                    # Copy files, adding them to the list of output files.
-                    for data in filename[1]:
-                        #FREDDIST next line changed
-                        if not os.path.exists(data):
-                            data = util.convert_path(
-                                    os.path.join(self.srcdir, data))
+    def skip_sysconf_file(self, src, dest):
+        """
+        Requires confirmation to overwrite the file
+        """
+        # Force overwrite:
+        if self.force or self.distribution.command_obj.get("bdist"):
+            return False
 
-                        # check if the confirmation is required
-                        if self.dont_overwrite(data, dirname):
-                            continue
+        # Get full name of target
+        destpath = os.path.join(dest, os.path.basename(src))
 
-                        (out, _) = self.copy_file(data, dirname)
-                        self.outfiles.append(out)
-                        self.modify_file("install_data", data, dirname)
-                        if 'bin' in out.split(os.path.sep) or\
-                                'sbin' in out.split(os.path.sep) or\
-                                'init.d' in out.split(os.path.sep):
-                            os.chmod(out, 0755)
+        # File does not exist or is the same
+        if not os.path.isfile(destpath) or filecmp.cmp(src, destpath):
+            return False
 
-                        if out.endswith('.py') and self.compile == 1:
-                            os.system('python -c "import py_compile; \
-                                    py_compile.compile(\'%s\')"' % out)
-                            self.outfiles.append(out + 'c')
-                            print "creating compiled %s" % out + 'c'
+        while True:
+            print "Configuration file '%s'\n" \
+                  "==> Since the installation was changed (by you or the script).\n" \
+                  "==> Distribution offers modified version.\n" \
+                  "What do you do? Possible options are:\n" \
+                  "Y or I : install the package version\n" \
+                  "N or O : keep the current version\n" \
+                  "D      : show the difference between the versions\n" \
+                  "Ctrl+Z : switch this process in the background (return back: 'fg')\n" \
+                  "The default action is to keep the current version.\n" \
+                  "*** (Y/I/N/O/D/Z) [default=N] ?" % destpath,
+            answer = raw_input()
+            if answer == "" or answer in ("n", "N", "o", "O"):
+                return True
+            if answer in ("y", "Y", "i", "I"):
+                return False
+            if answer in ("d", "D"):
+                # display difference
+                check_call(["diff", src, destpath])
 
-                        if out.endswith('.py') and self.optimize == 1:
-                            os.system('python -O -c "import py_compile; \
-                                    py_compile.compile(\'%s\')"' % out)
-                            self.outfiles.append(out + 'o')
-                            print "creating optimized %s" % out + 'o'
+    def copy_file(self, infile, outfile, preserve_mode=1, preserve_times=1, link=None, level=1):
+        """
+        Prompt for action on configuration files.
+        """
+        if outfile.startswith(self.sysconf_dir) and self.skip_sysconf_file(infile, outfile):
+            # Return proper result: target filename and 'copied' flag
+            return os.path.join(outfile, os.path.basename(infile)), 0
+        else:
+            result = _install_data.copy_file(self, infile, outfile, preserve_mode=1, preserve_times=1, link=None,
+                                             level=1)
+            return result

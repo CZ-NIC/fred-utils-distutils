@@ -1,43 +1,23 @@
-import sys
-
 from distutils.command.install_lib import install_lib as _install_lib
 
-from freddist.command.install_parent import install_parent
 
+class install_lib(_install_lib):
+    def build(self):
+        _install_lib.build(self)
+        if not self.skip_build:
+            if self.distribution.has_i18n_files():
+                self.run_command('build_i18n')
 
-class install_lib(_install_lib, install_parent):
+    def get_outputs(self):
+        outputs = _install_lib.get_outputs(self)
+        i18n_outputs = self._mutate_outputs(self.distribution.has_i18n_files(),
+                                            'build_i18n', 'build_lib',
+                                            self.install_dir)
+        return outputs + i18n_outputs
 
-    user_options = _install_lib.user_options + install_parent.user_options
-    boolean_options = _install_lib.boolean_options + install_parent.boolean_options
-
-    user_options.append(('root=', None,
-        'install everything relative to this alternate root directory'))
-    user_options.append(('prefix=', None,
-        'installation prefix'))
-
-    def __init__(self, *attrs):
-        _install_lib.__init__(self, *attrs)
-        install_parent.__init__(self, *attrs)
-
-    def initialize_options(self):
-        self.root = None
-        self.prefix = None
-        self.record = None
-        _install_lib.initialize_options(self)
-        install_parent.initialize_options(self)
-
-    def finalize_options(self):
-        _install_lib.finalize_options(self)
-        if 'install' in sys.argv:
-            self.set_undefined_options('install', *[(k, k) for k in self.UNDEFINED_OPTIONS])
-        else:
-            install_parent.finalize_options(self)
-        self.set_directories(self.prefix)
-        if not self.record and not self.no_record:
-            self.record = 'install.log'
-        self.srcdir = self.distribution.srcdir
-        self.rundir = self.distribution.rundir
-
-    def run(self):
-        self.install_dir = self.getDir_nop('purelibdir')
-        _install_lib.run(self)
+    def get_inputs(self):
+        inputs = _install_lib.get_inputs(self)
+        if self.distribution.has_i18n_files():
+            build_i18n = self.get_finalized_command('build_i18n')
+            inputs.extend(build_i18n.get_outputs())
+        return inputs

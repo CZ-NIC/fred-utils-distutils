@@ -19,16 +19,16 @@ from distutils.core import Command
 
 
 class uninstall(Command):
-
     description = "uninstall everything"
 
-    user_options = []
-    user_options.append(('record=', 'r',
-        'filename from which read list of installed files [install.log]'))
-    user_options.append(('dont-remove-log', 'l',
-        'do not remove log file'))
-    user_options.append(('remove-empty-dirs', 'd',
-        'uninstall also remove empty dirs'))
+    user_options = [
+        ('record=', 'r',
+         "filename from which read list of installed files [install.log]"),
+        ('dont-remove-log', 'l',
+         "do not remove log file"),
+        ('remove-empty-dirs', 'd',
+         "uninstall also remove empty dirs"),
+    ]
 
     boolean_options = ['dont_remove_log', 'remove_empty_dirs']
 

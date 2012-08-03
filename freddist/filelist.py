@@ -5,7 +5,7 @@ and building lists of files.
 """
 import os
 
-from distutils.filelist import FileList as _FileList
+from distutils.filelist import findall as _findall, FileList as _FileList
 
 
 def _strip_directory(filename, directory):
@@ -13,6 +13,7 @@ def _strip_directory(filename, directory):
     Strips directory from filename, if file is in directory or its subdirectories.
     """
     filename = os.path.normpath(filename)
+    directory = os.path.normpath(directory)
     if filename.startswith(directory):
         return os.path.relpath(filename, directory)
     else:
@@ -38,10 +39,19 @@ class FileList(_FileList):
 
     # -- List-like methods ---------------------------------------------
 
-    def append (self, item):
+    def append(self, item):
         # Store paths relatively to source directory
         _FileList.append(self, _strip_directory(item, self.srcdir))
 
-    def extend (self, items):
+    def extend(self, items):
         # Store paths relatively to source directory
         _FileList.extend(self, (_strip_directory(i, self.srcdir) for i in items))
+
+
+def findall(dir=os.curdir):
+    """
+    Finds all files under 'dir' and returns the list of full filenames (relative to 'dir').
+
+    Fix distutils version and really returns relative paths.
+    """
+    return [_strip_directory(f, dir) for f in _findall(dir)]

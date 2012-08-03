@@ -6,26 +6,37 @@ import re
 import sys
 
 from distutils.command.install import install as _install
+from distutils.util import change_root, convert_path, subst_vars
 from distutils.version import LooseVersion
-
-from freddist.command.install_parent import install_parent
 
 
 # Difference between freddist.install and distutils.install class isn't wide.
 # Only new options were added. Most of them are output directory related.
 # These are used so far by freddist.install_data class.
-# Others are `--preservepath' and `--dont-record'. Preservepath command is used
-# to cut root part of installation path (of course if `--root' is used) when
-# this installation path is e.g. used in config files.
+# The others is `--dont-record'.
 #
 # Default distutils bahaviour is not to create file with installed files list.
 # Freddist change it. Default is to create that file (due to uninstall class)
 # and `--dont-record' option prevent this.
 
-class install(_install, install_parent):
 
-    user_options = _install.user_options + install_parent.user_options
-    boolean_options = _install.boolean_options + install_parent.boolean_options
+class install(_install):
+    user_options = _install.user_options + [
+        ('install-doc=', None,
+         "installation directory for documentation"),
+        ('install-libexec=', None,
+         "installation directory for executables called by other programs"),
+        ('install-localstate=', None,
+         "installation directory for modifiable files"),
+        ('install-sysconf=', None,
+         "installation directory for configuration files"),
+        ('no-record', None,
+         "do not record list of installed files"),
+        ('no-check-deps', None,
+         "do not check dependencies"),
+    ]
+
+    boolean_options = _install.boolean_options + ['no_record', 'no_check_deps']
 
     DEPS_PYMODULE = None
     # Format: ('module_name[ [attr/function](compare number)]', ...)
@@ -64,24 +75,94 @@ class install(_install, install_parent):
         'deb': 'apt-get install',
     }
 
-    def __init__(self, *attrs):
-        "Initialize install object"
-        _install.__init__(self, *attrs)
-        install_parent.__init__(self, *attrs)
-
     def initialize_options(self):
-        "Initialize object attributes"
         _install.initialize_options(self)
-        install_parent.initialize_options(self)
 
+        # Another installation directories
+        self.install_doc = None
+        self.install_libexec = None
+        self.install_localstate = None
+        self.install_sysconf = None
+
+        self.no_record = None
+        self.no_check_deps = None
+
+        # File path replacements
+        self.config_dirs = None
 
     def finalize_options(self):
-        "Set defaults of attributes"
+        # Set defaults of freddist directories
+        if not self.install_doc:
+            self.install_doc = '$data/share/doc/$dist_name'
+        if not self.install_libexec:
+            self.install_libexec = '$platbase/libexec'
+        if not self.install_localstate:
+            self.install_localstate = '$base/var'
+        if not self.install_sysconf:
+            self.install_sysconf = '$base/etc'
+
+        # Call parent
         _install.finalize_options(self)
-        install_parent.finalize_options(self)
-        if not self.record and not self.no_record:
+
+        # Finalize freddist dirs
+        self.convert_paths('doc', 'libexec', 'localstate', 'sysconf')
+        if self.root is not None:
+            self.change_roots('doc', 'libexec', 'localstate', 'sysconf')
+
+        self.dump_dirs("after freddist directories")
+
+        if not self.no_record and not self.record:
             self.record = 'install.log'
 
+    def expand_dirs(self):
+        _install.expand_dirs(self)
+
+        # Add data directory to config vars
+        self.config_vars['data'] = self.install_data
+
+        # Expand freddist directories
+        self._expand_attrs(['install_doc',
+                            'install_libexec',
+                            'install_localstate',
+                            'install_sysconf'])
+
+        #XXX: Store configuration directories
+        # This is hack, but it is easier than removing root from final paths.
+        self.config_dirs = {'doc': self.install_doc,
+                            'data': self.install_data,
+                            'headers': self.install_headers,
+                            'localstate': self.install_localstate,
+                            'libexec': self.install_libexec,
+                            'platlib': self.install_platlib,
+                            'purelib': self.install_purelib,
+                            'scripts': self.install_scripts,
+                            'sysconf': self.install_sysconf}
+
+    def run(self):
+        """
+        Run install process
+        """
+        if self.no_check_deps is None:
+            self.check_dependencies()
+        _install.run(self)
+
+        # Run file modifications
+        for filename, callback in self.distribution.modify_files.iteritems():
+            fullname = convert_path(self.expand_filename(filename))
+            if self.root is not None:
+                fullname = change_root(self.root, fullname)
+            if fullname in self.get_outputs():
+                getattr(self, callback)(fullname)
+            else:
+                self.warn("Modified file '%s' not found." % filename)
+
+    def expand_filename(self, filename):
+        """
+        Expands parametrized filename.
+        """
+        return subst_vars(filename, self.config_dirs)
+
+    #===== Dependency checks ===========================================================================================
     def get_help4dist(self):
         "Get help depends on distribution"
         # set the distribution depended help
@@ -105,7 +186,6 @@ class install(_install, install_parent):
             self.__missing_modules.append(module_name)
         return module
 
-
     def __grab_module_version(self, module, attr_name):
         "Grab version of module using attr_name or some common names"
         module_version = None
@@ -122,7 +202,6 @@ class install(_install, install_parent):
             module_version = '.'.join([str(item) for item in module_version])
         return str(module_version)
 
-
     def __parse_compare_version(self, compare_version):
         "Parse compare signs and version number from text"
         # compare_version: '>= 1.2' or '1.2.0'
@@ -133,13 +212,11 @@ class install(_install, install_parent):
             compare, version = match.groups()
         return compare, version
 
-
     def __check_command_version(self, module_name, compare_version, command):
         "Check command version"
         module_version = os.popen(command).read().strip()
         self.__do_version_comparation(module_name,
                                       module_version, compare_version)
-
 
     def __check_module_version(self, module, module_name, version_func,
                                compare_version):
@@ -152,7 +229,6 @@ class install(_install, install_parent):
         else:
             self.__do_version_comparation(module_name, module_version,
                                           compare_version)
-
 
     def __do_version_comparation(self, module_name, module_version,
                                  compare_version):
@@ -181,7 +257,6 @@ class install(_install, install_parent):
             self.__missing_modules.append('Module %s %s is not in required '
                     'version %s.' % (module_name, vers1, vers2))
 
-
     def check_mymodules(self):
         "Check mypthon modules. Save missing names into self.__missing_modules"
         if self.DEPS_PYMODULE is None:
@@ -204,7 +279,6 @@ class install(_install, install_parent):
                 self.__check_module_version(module, module_name, version_func,
                                             compare_version)
 
-
     def check_commands(self):
         """Check shell commands. Use 'which command'.
         Save missing names into self.__missing_modules.
@@ -218,7 +292,6 @@ class install(_install, install_parent):
                                     self.DEPS_COMMAND_VERSION.has_key(command):
                 compare_version, cmd = self.DEPS_COMMAND_VERSION[command]
                 self.__check_command_version(command, compare_version, cmd)
-
 
     def check_dependencies(self):
         'Check application dependencies'
@@ -244,13 +317,3 @@ class install(_install, install_parent):
                         self.DEPS_HELP_COMMAND.get(dist, ''),
                         " ".join(helptext))
             raise SystemExit
-
-
-    def run(self):
-        "Run install process"
-
-        if self.no_check_deps is None:
-            self.check_dependencies()
-
-        _install.run(self)
-        self.normalize_record()

@@ -1,20 +1,18 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 import os
-import subprocess
-import sys
+import re
 
 from distutils.core import Command
 
-from freddist.command.install_parent import install_parent
+from freddist.util import check_call
 
 
 # name of package release
 UBUNTU_NAME = 'jaunty'
 
 
-class bdist_deb (Command):
-
+class bdist_deb(Command):
     description = "create a Debian distribution"
 
     user_options = [
@@ -70,49 +68,31 @@ class bdist_deb (Command):
                               "It is required for create deb."
 
         # check debian/control
-        controlpath = os.path.join(self.distribution.srcdir,
-                                   "doc", "debian", "control")
+        controlpath = os.path.join(self.distribution.srcdir, "doc", "debian", "control")
         if not os.path.isfile(controlpath):
             raise SystemExit, "Error: %s missing." % controlpath
 
         # other options must be set in setup.cfg
-        ex = "" if self.install_extra_opts is None else self.install_extra_opts
-        command = "python %s install %s --no-compile --no-pycpyo --preservepath --no-check-deps "\
-                  "--root=%s" % (os.path.join(self.distribution.srcdir, 'setup.py') , ex, self.bdist_base)
-        print "running command:", command
-        if not do_command(command):
+        command = ['python', os.path.join(self.distribution.srcdir, 'setup.py'), 'install',
+                   self.install_extra_opts or '', '--no-compile', '--no-check-deps', '--root', self.bdist_base]
+        if not check_call(command):
             return
 
         # prepare package name and find paths
-        version = "%s%s-%s~%s+%s" % (self.epoch,
-                self.distribution.get_version(), self.package_version,
-                self.release, self.build_int)
-        deb_name = "%s_%s_%s" % (self.distribution.get_name(), version,
-                                 self.platform)
+        version = "%s%s-%s~%s+%s" % (self.epoch, self.distribution.get_version(), self.package_version, self.release,
+                                     self.build_int)
+        deb_name = "%s_%s_%s" % (self.distribution.get_name(), version, self.platform)
         build_dir = os.path.abspath(self.bdist_base)
-        current_dir = os.getcwd()
 
         # modify control file
-        path = os.path.join(build_dir, "DEBIAN", "control")
-        command_obj = install_parent()
-        command_obj.replace_pattern(path, path,
-                (("PACKAGE_VERSION", version), ("PLATFORM", self.platform)))
+        controlpath = os.path.join(build_dir, "DEBIAN", "control")
+        control_data = open(controlpath, 'r').read()
+        control_data = re.sub('PACKAGE_VERSION', version, control_data)
+        control_data = re.sub('PLATFORM', self.platform, control_data)
+        open(controlpath, 'w').write(control_data)
 
-        for command in (
-            'cd %s; find * -type f | grep -v "^DEBIAN/" | while read x;'\
-                        'do md5sum "${x}";done > DEBIAN/md5sums' % build_dir,
-            'cd %s' % current_dir,
-            'dpkg-deb -b %s %s.deb' % (build_dir, deb_name),
-            ):
-            print "running command:", command
-            if not do_command(command):
-                break
-
-def do_command(command):
-    "Run any command in subprocess"
-    popen = subprocess.Popen(command, shell=True, stderr=subprocess.PIPE)
-    error = popen.stderr.read()
-    if error:
-        print >> sys.stderr, error
-        return False
-    return True
+        command = 'find %s -type f ! -regex "^DEBIAN/" -exec md5sum {} >> %s/DEBIAN/md5sums \;' % (build_dir, build_dir)
+        if not check_call(command):
+            return
+        if not check_call(['dpkg-deb', '-b', build_dir, '%s.deb' % deb_name]):
+            return
