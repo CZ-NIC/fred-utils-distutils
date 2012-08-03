@@ -6,6 +6,7 @@ from types import TupleType
 
 from distutils import dir_util, file_util, log
 from distutils.command.sdist import sdist as _sdist
+from distutils.util import convert_path
 
 from freddist.filelist import FileList
 
@@ -59,11 +60,15 @@ class sdist(_sdist):
           - setup.py
           - test/test*.py
           - all pure Python modules mentioned in setup script
+          - all files pointed by package_data (build_py)
+          - all files defined in data_files.
+          - all files defined as scripts.
           - all C sources listed as part of extensions or C libraries
             in the setup script (doesn't catch C headers!)
         Warns if (README or README.txt) or setup.py are missing; everything
         else is optional.
         """
+        # This method is copied from version 2.7
 
         standards = [('README', 'README.txt'), self.distribution.script_name]
         for fn in standards:
@@ -98,9 +103,38 @@ class sdist(_sdist):
             if files:
                 self.filelist.extend(files)
 
+        # build_py is used to get:
+        #  - python modules
+        #  - files defined in package_data
+        build_py = self.get_finalized_command('build_py')
+
+        # getting python files
         if self.distribution.has_pure_modules():
-            build_py = self.get_finalized_command('build_py')
             self.filelist.extend(build_py.get_source_files())
+
+        # getting package_data files
+        # (computed in build_py.data_files by build_py.finalize_options)
+        for pkg, src_dir, build_dir, filenames in build_py.data_files:
+            for filename in filenames:
+                self.filelist.append(os.path.join(src_dir, filename))
+
+        # getting distribution.data_files
+        if self.distribution.has_data_files():
+            for item in self.distribution.data_files:
+                if isinstance(item, str): # plain file
+                    item = convert_path(item)
+                    #FREDDIST: create full path
+                    item = os.path.join(self.srcdir, item)
+                    if os.path.isfile(item):
+                        self.filelist.append(item)
+                else:    # a (dirname, filenames) tuple
+                    dirname, filenames = item
+                    for f in filenames:
+                        f = convert_path(f)
+                        #FREDDIST: create full path
+                        f = os.path.join(self.srcdir, f)
+                        if os.path.isfile(f):
+                            self.filelist.append(f)
 
         if self.distribution.has_ext_modules():
             build_ext = self.get_finalized_command('build_ext')
