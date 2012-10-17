@@ -5,7 +5,7 @@ from distutils.dist import Distribution as _Distribution
 
 class Distribution(_Distribution):
     def __init__(self, attrs=None):
-        self.srcdir = attrs['srcdir']
+        self.srcdir = os.path.normpath(attrs['srcdir'])
         self.rundir = attrs.get('rundir', os.getcwd())
         self.requires = None
 

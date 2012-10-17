@@ -12,6 +12,7 @@ def _strip_directory(filename, directory):
     """
     Strips directory from filename, if file is in directory or its subdirectories.
     """
+    filename = os.path.normpath(filename)
     if filename.startswith(directory):
         return os.path.relpath(filename, directory)
     else:
