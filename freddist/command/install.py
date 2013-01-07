@@ -316,4 +316,4 @@ class install(_install):
                 print >> sys.stderr, "%s %s" % (
                         self.DEPS_HELP_COMMAND.get(dist, ''),
                         " ".join(helptext))
-            raise SystemExit
+            raise SystemExit(1)
