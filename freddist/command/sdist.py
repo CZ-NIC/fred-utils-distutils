@@ -196,10 +196,6 @@ class sdist(_sdist):
                 dest = os.path.join(base_dir, file)
                 self.copy_file(src, dest, link=link)
 
-        #FREDDIST: pack freddist module
-        import freddist
-        dir_util.copy_tree(os.path.dirname(freddist.__file__), os.path.join(base_dir, "freddist"))
-
         self.distribution.metadata.write_pkg_info(base_dir)
 
     #FREDDIST: new method
