@@ -15,9 +15,12 @@ def setup(**attrs):
     Replace default Distribution class.
     """
     srcdir = attrs.setdefault('srcdir', os.path.dirname(sys.argv[0]))
-    # Set default version if required
+    # Get version from git, if available
     if 'version' not in attrs:
-        attrs['version'] = get_git_version(srcdir)
+        try:
+            attrs['version'] = get_git_version(srcdir)
+        except ValueError:
+            pass
     # Set default Distribution class
     attrs.setdefault('distclass', Distribution)
     # Set default script_name full
