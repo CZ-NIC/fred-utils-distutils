@@ -35,8 +35,7 @@
 __all__ = ("get_git_version")
 
 import os
-
-from subprocess import Popen, PIPE
+from subprocess import PIPE, Popen
 
 
 def call_git_describe(srcdir=None, abbrev=4):

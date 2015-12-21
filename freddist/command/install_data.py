@@ -1,11 +1,9 @@
 import filecmp
 import os
-
+from distutils.command.install_data import install_data as _install_data
+from distutils.util import change_root, subst_vars
 from subprocess import check_call
 from types import StringType
-
-from distutils.command.install_data import install_data as _install_data
-from distutils.util import subst_vars, change_root
 
 
 class install_data(_install_data):

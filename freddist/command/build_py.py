@@ -1,5 +1,4 @@
 import os
-
 from distutils.command.build_py import build_py as _build_py
 
 

@@ -3,7 +3,6 @@
 Implements the Distutils 'build_i18n' command."""
 import os
 import sys
-
 from distutils.core import Command
 from distutils.util import convert_path
 

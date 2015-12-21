@@ -1,5 +1,4 @@
 import os
-
 from distutils import log
 from distutils.command.clean import clean as _clean
 

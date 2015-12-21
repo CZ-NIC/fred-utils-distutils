@@ -4,8 +4,7 @@ Provides the FileList class, used for poking about the filesystem
 and building lists of files.
 """
 import os
-
-from distutils.filelist import findall as _findall, FileList as _FileList
+from distutils.filelist import FileList as _FileList, findall as _findall
 
 
 def _strip_directory(filename, directory):

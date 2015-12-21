@@ -14,7 +14,6 @@ Implements the freddist 'uninstall' command.
 # TODO uninstall command do not work when installing to different root
 # (param --root is used)
 import os
-
 from distutils.core import Command
 
 

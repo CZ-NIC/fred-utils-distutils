@@ -5,19 +5,19 @@ one of the other *util.py modules.
 """
 import os
 import sys
-from subprocess import check_call as _check_call, CalledProcessError
-
 from distutils import log
 from distutils.dep_util import newer
 from distutils.util import convert_path
+from subprocess import CalledProcessError, check_call as _check_call
+
+from freddist.filelist import findall
+
 try:
     # distutils version 2.6.5
     from distutils.errors import DistutilsByteCompileError
 except ImportError:
     # distutils version 2.5.1
     from distutils.errors import CompileError as DistutilsByteCompileError
-
-from freddist.filelist import findall
 
 
 def check_call(*args, **kwargs):

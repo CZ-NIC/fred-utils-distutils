@@ -1,9 +1,7 @@
 import os
 import sys
-
-from tempfile import NamedTemporaryFile
-
 from distutils.command.bdist_rpm import bdist_rpm as _bdist_rpm
+from tempfile import NamedTemporaryFile
 
 
 # bdist_rpm notes:

@@ -1,5 +1,4 @@
 import os
-
 from distutils.dist import Distribution as _Distribution
 from distutils.errors import DistutilsModuleError
 

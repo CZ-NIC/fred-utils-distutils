@@ -1,12 +1,10 @@
 import os
 import string
-
-from glob import glob
-from types import TupleType
-
 from distutils import dir_util, file_util, log
 from distutils.command.sdist import sdist as _sdist
 from distutils.util import convert_path
+from glob import glob
+from types import TupleType
 
 from freddist.filelist import FileList
 

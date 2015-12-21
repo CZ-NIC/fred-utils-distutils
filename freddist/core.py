@@ -3,7 +3,6 @@ freddist.core
 """
 import os
 import sys
-
 from distutils.core import setup as _setup
 
 from freddist.dist import Distribution

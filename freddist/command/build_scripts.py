@@ -1,5 +1,4 @@
 import os
-
 from distutils.command.build_scripts import build_scripts as _build_scripts
 
 

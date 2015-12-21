@@ -4,7 +4,6 @@ This module extends distutils.install by new functrions and features .
 import os
 import re
 import sys
-
 from distutils.command.install import install as _install
 from distutils.util import change_root, convert_path, subst_vars
 from distutils.version import LooseVersion

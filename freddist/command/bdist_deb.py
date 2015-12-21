@@ -2,11 +2,9 @@
 # -*- coding: utf-8 -*-
 import os
 import re
-
 from distutils.core import Command
 
 from freddist.util import check_call
-
 
 # name of package release
 UBUNTU_NAME = 'jaunty'
