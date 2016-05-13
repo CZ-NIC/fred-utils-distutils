@@ -2,7 +2,6 @@
 # Author: Douglas Creager <dcreager@dcreager.net>
 # Changed by CZ.NIC to suit the need
 # This file is placed into the public domain.
-
 # Calculates the current version number. If possible, this is the
 # output of “git describe”, modified to conform to the versioning
 # scheme that setuptools uses. If “git describe” returns an error
@@ -31,11 +30,10 @@
 # contains the following line:
 #
 # include RELEASE-VERSION
-
-__all__ = ("get_git_version")
-
 import os
 from subprocess import PIPE, Popen
+
+__all__ = ("get_git_version")
 
 
 def call_git_describe(srcdir=None, abbrev=4):
@@ -45,7 +43,7 @@ def call_git_describe(srcdir=None, abbrev=4):
     '''
     try:
         command = ['git', 'describe', '--abbrev=%d' % abbrev, '--tags']
-        if srcdir: # set git options for where is git repository and working tree (must be before describe command)
+        if srcdir:  # set git options for where is git repository and working tree (must be before describe command)
             command.insert(1, '--git-dir=%s' % os.path.join(srcdir, '.git'))
             command.insert(1, '--work-tree=%s' % srcdir)
         popen = Popen(command, stdout=PIPE, stderr=PIPE)

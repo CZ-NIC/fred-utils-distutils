@@ -26,7 +26,7 @@ class sdist(_sdist):
         self.template = os.path.join(self.distribution.srcdir, self.template)
 
     def run(self):
-        #FREDDIST: Use different FileList
+        # FREDDIST: Use different FileList
         # 'filelist' contains the list of files that will make up the
         # manifest
         self.filelist = FileList(srcdir=self.distribution.srcdir)
@@ -40,7 +40,7 @@ class sdist(_sdist):
         # whatever).  File list is accumulated in 'self.filelist'.
         self.get_file_list()
 
-        #FREDDIST: Just create 'MANIFEST.in'
+        # FREDDIST: Just create 'MANIFEST.in'
         if self.create_manifest_in:
             self.generate_manifest_in()
             return
@@ -53,7 +53,7 @@ class sdist(_sdist):
         # or zipfile, or whatever.
         self.make_distribution()
 
-    def add_defaults (self):
+    def add_defaults(self):
         """Add all the default files to self.filelist:
           - README or README.txt
           - setup.py
@@ -75,7 +75,7 @@ class sdist(_sdist):
                 alts = fn
                 got_it = 0
                 for fn in alts:
-                    #FREDDIST: create full path
+                    # FREDDIST: create full path
                     fn = os.path.join(self.distribution.srcdir, fn)
                     if os.path.exists(fn):
                         got_it = 1
@@ -86,17 +86,17 @@ class sdist(_sdist):
                     self.warn("standard file not found: should have one of " +
                               string.join(alts, ', '))
             else:
-                #FREDDIST: create full path
+                # FREDDIST: create full path
                 fn = os.path.join(self.distribution.srcdir, fn)
                 if os.path.exists(fn):
                     self.filelist.append(fn)
                 else:
                     self.warn("standard file '%s' not found" % fn)
 
-        #FREDDIST: add release version file
+        # FREDDIST: add release version file
         optional = ['test/test*.py', 'setup.cfg', 'RELEASE-VERSION']
         for pattern in optional:
-            #FREDDIST: create full path
+            # FREDDIST: create full path
             pattern = os.path.join(self.distribution.srcdir, pattern)
             files = filter(os.path.isfile, glob(pattern))
             if files:
@@ -120,9 +120,9 @@ class sdist(_sdist):
         # getting distribution.data_files
         if self.distribution.has_data_files():
             for item in self.distribution.data_files:
-                if isinstance(item, str): # plain file
+                if isinstance(item, str):  # plain file
                     item = convert_path(item)
-                    #FREDDIST: create full path
+                    # FREDDIST: create full path
                     item = os.path.join(self.distribution.srcdir, item)
                     if os.path.isfile(item):
                         self.filelist.append(item)
@@ -130,7 +130,7 @@ class sdist(_sdist):
                     dirname, filenames = item
                     for f in filenames:
                         f = convert_path(f)
-                        #FREDDIST: create full path
+                        # FREDDIST: create full path
                         f = os.path.join(self.distribution.srcdir, f)
                         if os.path.isfile(f):
                             self.filelist.append(f)
@@ -147,12 +147,12 @@ class sdist(_sdist):
             build_scripts = self.get_finalized_command('build_scripts')
             self.filelist.extend(build_scripts.get_source_files())
 
-        #FREDDIST: add i18n files
+        # FREDDIST: add i18n files
         if self.distribution.has_i18n_files():
             build_i18n = self.get_finalized_command('build_i18n')
             self.filelist.extend(build_i18n.get_source_files())
 
-    def make_release_tree (self, base_dir, files):
+    def make_release_tree(self, base_dir, files):
         """Create the directory tree that will become the source
         distribution archive.  All directories implied by the filenames in
         'files' are created under 'base_dir', and then we hard link or copy
@@ -186,7 +186,7 @@ class sdist(_sdist):
         else:
             log.info(msg)
         for file in files:
-            #FREDDIST: create full filename
+            # FREDDIST: create full filename
             src = os.path.join(self.distribution.srcdir, file)
             if not os.path.isfile(src):
                 log.warn("'%s' not a regular file -- skipping" % file)
@@ -196,7 +196,7 @@ class sdist(_sdist):
 
         self.distribution.metadata.write_pkg_info(base_dir)
 
-    #FREDDIST: new method
+    # FREDDIST: new method
     def generate_manifest_in(self, initial=None):
         """
         This function generage file MANIFEST.in from distribution.data_files array.

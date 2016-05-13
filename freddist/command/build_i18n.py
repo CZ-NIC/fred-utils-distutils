@@ -19,7 +19,7 @@ class build_i18n(Command):
         ('force', 'f', "forcibly build everything (ignore file timestamps)"),
     ]
     boolean_options = ['compile-i18n', 'force']
-    negative_opt = {'no-compile-i18n' : 'compile-i18n'}
+    negative_opt = {'no-compile-i18n': 'compile-i18n'}
 
     def initialize_options(self):
         self.build_lib = None

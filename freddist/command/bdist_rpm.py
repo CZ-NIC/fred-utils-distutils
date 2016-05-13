@@ -28,13 +28,14 @@ class bdist_rpm(_bdist_rpm):
         _bdist_rpm.initialize_options(self)
 
     def finalize_options(self):
-        self.set_undefined_options('bdist',
-                ('build_extra_opts', 'build_extra_opts'),
-                ('install_extra_opts', 'install_extra_opts'),
+        self.set_undefined_options(
+            'bdist',
+            ('build_extra_opts', 'build_extra_opts'),
+            ('install_extra_opts', 'install_extra_opts'),
         )
 
         # Prepend source directory to scripts if required
-        #XXX: This stands on water as we have no idea if it should be prepended or not, so we only add it as last
+        # XXX: This stands on water as we have no idea if it should be prepended or not, so we only add it as last
         # attempt to make things work.
         for script in ('prep_script', 'build_script', 'install_script', 'clean_script', 'verify_script', 'pre_install',
                        'post_install', 'pre_uninstall', 'post_uninstall'):
@@ -52,7 +53,6 @@ class bdist_rpm(_bdist_rpm):
         """
         Changes default build and install scripts.
         """
-        #build_dir = os.path.join(self.rpm_base, 'BUILD')
         def_setup_call = "%s %s" % (self.python, os.path.basename(sys.argv[0]))
 
         if not self.build_script:

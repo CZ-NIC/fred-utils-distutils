@@ -17,7 +17,7 @@ class install_data(_install_data):
 
     To change replacements, pass options to `install` command.
     """
-    #TODO: Is it possible to use install_data on its own with all replacements?
+    # TODO: Is it possible to use install_data on its own with all replacements?
     # Do not be confused, it is not easy to do so.
     user_options = _install_data.user_options + [
         ('sysconf_dir=', None,
@@ -35,7 +35,8 @@ class install_data(_install_data):
         _install_data.finalize_options(self)
 
         # Get file path replacements from `install` command
-        self.set_undefined_options('install',
+        self.set_undefined_options(
+           'install',
            ('config_dirs', 'config_dirs'),
            ('install_sysconf', 'sysconf_dir'),
         )

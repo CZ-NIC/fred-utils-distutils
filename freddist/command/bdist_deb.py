@@ -23,7 +23,7 @@ class bdist_deb(Command):
         ('install-extra-opts=', 'i', 'extra option(s) passed to install command'),
     ]
 
-    def initialize_options (self):
+    def initialize_options(self):
         self.bdist_base = None
         self.epoch = None
         self.package_version = None
@@ -32,12 +32,11 @@ class bdist_deb(Command):
         self.platform = None
         self.install_extra_opts = None
 
-    def finalize_options (self):
+    def finalize_options(self):
         if not self.bdist_base:
             self.bdist_base = 'deb'
         elif self.bdist_base == "build":
-            raise SystemExit("Error --bdist-base: Folder name 'build' is " \
-                             "reserved for building process.")
+            raise SystemExit("Error --bdist-base: Folder name 'build' is reserved for building process.")
 
         # epoch zero is shown empty string "" otherwice "NUMBER:"
         if not self.epoch:
@@ -51,24 +50,23 @@ class bdist_deb(Command):
         if not self.build_int:
             self.build_int = '1'
         if not self.platform:
-            self.platform = 'all' # architecture
+            self.platform = 'all'  # architecture
 
         # it is necessary overwrite extra-opts if the command 'bdist' is set
-        if self.distribution.command_options.has_key('bdist'):
+        if 'bdist' in self.distribution.command_options:
             bdist_val = self.distribution.command_options['bdist']
-            if bdist_val.has_key('install_extra_opts'):
+            if 'install_extra_opts' in bdist_val:
                 self.install_extra_opts = bdist_val['install_extra_opts'][1]
 
-    def run (self):
+    def run(self):
         # check if exists tool for create deb package
         if os.popen("which dpkg-deb").read() == "":
-            raise SystemExit, "Error: dpkg-deb missing. "\
-                              "It is required for create deb."
+            raise SystemExit("Error: dpkg-deb missing. It is required for create deb.")
 
         # check debian/control
         controlpath = os.path.join(self.distribution.srcdir, "doc", "debian", "control")
         if not os.path.isfile(controlpath):
-            raise SystemExit, "Error: %s missing." % controlpath
+            raise SystemExit("Error: %s missing." % controlpath)
 
         # other options must be set in setup.cfg
         command = ['python', os.path.join(self.distribution.srcdir, 'setup.py'), 'install',
@@ -89,7 +87,8 @@ class bdist_deb(Command):
         control_data = re.sub('PLATFORM', self.platform, control_data)
         open(controlpath, 'w').write(control_data)
 
-        command = 'find %s -type f ! -regex "^DEBIAN/" -exec md5sum {} >> %s/DEBIAN/md5sums \;' % (build_dir, build_dir)
+        command = r'find %s -type f ! -regex "^DEBIAN/" -exec md5sum {} >> %s/DEBIAN/md5sums \;' % \
+            (build_dir, build_dir)
         if not check_call(command):
             return
         if not check_call(['dpkg-deb', '-b', build_dir, '%s.deb' % deb_name]):

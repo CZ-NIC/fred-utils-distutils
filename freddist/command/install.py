@@ -67,7 +67,7 @@ class install(_install):
     #                 "xsltproc --version | head -n 1 | awk '{print $5}'"),
     #    'xmllint': (">= 20631",
     #                "xmllint 2>&1 --version | head -n 1 | awk '{print $NF}'"),
-    #}
+    # }
 
     DEPS_HELP_COMMAND = {
         'rpm': 'yum install',
@@ -125,7 +125,7 @@ class install(_install):
                             'install_localstate',
                             'install_sysconf'])
 
-        #XXX: Store configuration directories
+        # XXX: Store configuration directories
         # This is hack, but it is easier than removing root from final paths.
         self.config_dirs = {'doc': self.install_doc,
                             'data': self.install_data,
@@ -161,7 +161,7 @@ class install(_install):
         """
         return subst_vars(filename, self.config_dirs)
 
-    #===== Dependency checks ===========================================================================================
+    # ===== Dependency checks ==========================================================================================
     def get_help4dist(self):
         "Get help depends on distribution"
         # set the distribution depended help
@@ -172,7 +172,7 @@ class install(_install):
             dist = 'deb'
         elif re.search('Fedora', sys.version):
             dist = 'rpm'
-        if dist and self.DEPS_HELP.has_key(dist):
+        if dist and dist in self.DEPS_HELP:
             help_text = self.DEPS_HELP[dist]
         return dist, help_text
 
@@ -192,7 +192,7 @@ class install(_install):
         # common names of function/attribute holding version number
         for key in (attr_name, 'version', 'VERSION', '__version__'):
             if key is None:
-                continue # user did not defined version attr.
+                continue  # user did not defined version attr.
             if hasattr(module, key):
                 attr = getattr(module, key)
                 module_version = attr() if callable(attr) else attr
@@ -223,8 +223,9 @@ class install(_install):
         # Actual installed module version
         module_version = self.__grab_module_version(module, version_func)
         if module_version is None:
-            self.__missing_modules.append('Version Error: Version value was '
-                    'not found in module %s.' % module_name)
+            self.__missing_modules.append(
+                'Version Error: Version value was not found in module %s.' % module_name
+            )
         else:
             self.__do_version_comparation(module_name, module_version,
                                           compare_version)
@@ -253,13 +254,14 @@ class install(_install):
             self.__missing_modules.append('Invalid comparation %s' % compare)
 
         if not result:
-            self.__missing_modules.append('Module %s %s is not in required '
-                    'version %s.' % (module_name, vers1, vers2))
+            self.__missing_modules.append(
+                'Module %s %s is not in required version %s.' % (module_name, vers1, vers2)
+            )
 
     def check_mymodules(self):
         "Check mypthon modules. Save missing names into self.__missing_modules"
         if self.DEPS_PYMODULE is None:
-            return # no any python modules dependencies
+            return  # no any python modules dependencies
         for item in self.DEPS_PYMODULE:
             # item: "django"
             module_name, version_func, compare_version = item, None, None
@@ -283,12 +285,11 @@ class install(_install):
         Save missing names into self.__missing_modules.
         """
         if self.DEPS_COMMAND is None:
-            return # no any command dependencies
-        for command in  self.DEPS_COMMAND:
+            return  # no any command dependencies
+        for command in self.DEPS_COMMAND:
             if os.popen("which %s" % command).read() == "":
                 self.__missing_modules.append(command)
-            elif self.DEPS_COMMAND_VERSION is not None and \
-                                    self.DEPS_COMMAND_VERSION.has_key(command):
+            elif self.DEPS_COMMAND_VERSION is not None and command in self.DEPS_COMMAND_VERSION:
                 compare_version, cmd = self.DEPS_COMMAND_VERSION[command]
                 self.__check_command_version(command, compare_version, cmd)
 
@@ -308,7 +309,7 @@ class install(_install):
             # get dict with help text for particular distribution
             dist, help = self.get_help4dist()
             helptext = [name for name in self.__missing_modules
-                        if help.has_key(name)]
+                        if name in help]
             if len(helptext):
                 print >> sys.stderr, "To install missing requirements " \
                         "log in as root and process following command:"
