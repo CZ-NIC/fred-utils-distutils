@@ -6,7 +6,8 @@ one of the other *util.py modules.
 import os
 import sys
 from distutils import log
-from distutils.dep_util import newer
+from distutils.dep_util import newer, newer_group
+from distutils.dir_util import mkpath
 from distutils.util import convert_path
 from subprocess import CalledProcessError, check_call as _check_call
 
@@ -55,6 +56,24 @@ def i18n_compile(i18n_files, force=0, dry_run=0):
                     log.warn("error in compilation of %s to %s", filename, outfile)
         else:
             log.debug("skipping byte-compilation of %s to %s", filename, outfile)
+
+
+def scss_compile(scss_files, force=0, dry_run=0):
+    """
+    Compile SCSS files.
+    """
+    for output, inputs in scss_files.items():
+        cmd = ['pyscss', '-o', output] + list(inputs)
+
+        if force or newer_group(inputs, output):
+            log.info("SCSS compiling %s to %s", inputs, output)
+            if not dry_run:
+                # Create directory if it doesn't exist
+                mkpath(os.path.dirname(output))
+                if not check_call(cmd):
+                    log.warn("error in SCSS compilation of %s to %s", inputs, output)
+        else:
+            log.debug("skipping SCSS compilation of %s to %s", inputs, output)
 
 
 # Copied from setuptools

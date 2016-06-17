@@ -9,6 +9,7 @@ class Distribution(_Distribution):
 
      * modify_files
      * i18n_files - list of gettext text files to be compiled and distributed (like included in package_data).
+     * scss_files - a dictionary of SCSS files - keys are CSS output files, values are lists of SCSS input files
     """
     def __init__(self, attrs=None):
         self.srcdir = os.path.normpath(attrs['srcdir'])
@@ -20,6 +21,7 @@ class Distribution(_Distribution):
         self.modify_files = {}
 
         self.i18n_files = None
+        self.scss_files = None
 
         _Distribution.__init__(self, attrs)
 
@@ -63,3 +65,6 @@ class Distribution(_Distribution):
 
     def has_i18n_files(self):
         return self.i18n_files and len(self.i18n_files) > 0
+
+    def has_scss_files(self):
+        return self.scss_files and len(self.scss_files) > 0

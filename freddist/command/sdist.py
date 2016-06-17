@@ -147,10 +147,13 @@ class sdist(_sdist):
             build_scripts = self.get_finalized_command('build_scripts')
             self.filelist.extend(build_scripts.get_source_files())
 
-        # FREDDIST: add i18n files
+        # FREDDIST: add i18n and SCSS files
         if self.distribution.has_i18n_files():
             build_i18n = self.get_finalized_command('build_i18n')
             self.filelist.extend(build_i18n.get_source_files())
+        if self.distribution.has_scss_files():
+            build_scss = self.get_finalized_command('build_scss')
+            self.filelist.extend(build_scss.get_source_files())
 
     def make_release_tree(self, base_dir, files):
         """Create the directory tree that will become the source
