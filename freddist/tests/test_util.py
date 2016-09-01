@@ -114,3 +114,17 @@ class TestScssCompile(unittest.TestCase):
         # pyscss create the outfile even if it fails
         self.assertTrue(os.path.exists(outfile))
         self.assertEqual(open(outfile).read(), '')
+
+    def test_compile_srcdir(self):
+        outfile = os.path.join(self.tmp_dir, 'outfile.css')
+        infile = os.path.join(self.tmp_dir, 'infile.scss')
+        with open(infile, 'w') as scss:
+            scss.write('@import "included"\n')
+        os.mkdir(os.path.join(self.tmp_dir, 'srcdir'))
+        included = os.path.join(self.tmp_dir, 'srcdir', 'included.scss')
+        with open(included, 'w') as included_scss:
+            included_scss.write('$color: #fff;\nbody: {color: $color;}\n')
+
+        scss_compile({outfile: [infile]}, srcdir=os.path.join(self.tmp_dir, 'srcdir'))
+
+        self.assertScssOutputEqual(open(outfile).read(), 'body-color:#fff\n')

@@ -68,4 +68,4 @@ class build_scss(Command):
             outfile = os.path.join(self.build_lib, convert_path(output))
             infiles = [os.path.join(self.distribution.srcdir, convert_path(i)) for i in inputs]
             scss_files[outfile] = infiles
-        utils_scss_compile(scss_files, force=self.force, dry_run=self.dry_run)
+        utils_scss_compile(scss_files, srcdir=self.distribution.srcdir, force=self.force, dry_run=self.dry_run)

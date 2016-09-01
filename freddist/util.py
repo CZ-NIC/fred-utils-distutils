@@ -58,12 +58,15 @@ def i18n_compile(i18n_files, force=0, dry_run=0):
             log.debug("skipping byte-compilation of %s to %s", filename, outfile)
 
 
-def scss_compile(scss_files, force=0, dry_run=0):
+def scss_compile(scss_files, srcdir=None, force=0, dry_run=0):
     """
     Compile SCSS files.
     """
     for output, inputs in scss_files.items():
-        cmd = ['pyscss', '-o', output] + list(inputs)
+        cmd = ['pyscss', '--output', output]
+        if srcdir:
+            cmd += ['--load-path', srcdir]
+        cmd += list(inputs)
 
         if force or newer_group(inputs, output):
             log.info("SCSS compiling %s to %s", inputs, output)

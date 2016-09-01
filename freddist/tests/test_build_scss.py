@@ -33,6 +33,24 @@ class TestBuildScss(unittest.TestCase):
         outfile = os.path.join(self.tmp_dir, 'outfile.css')
         self.assertIn('body-color:#fff', open(outfile).read())
 
+    def test_build_scss_srcdir(self):
+        os.mkdir(os.path.join(self.srcdir, 'sources'))
+        infile = os.path.join(self.srcdir, 'sources', 'infile.scss')
+        with open(infile, 'w') as scss:
+            scss.write('@import "sources/included"\n')
+        included = os.path.join(self.srcdir, 'sources', 'included.scss')
+        with open(included, 'w') as included_scss:
+            included_scss.write('$color: #fff;\nbody: {color: $color;}\n')
+
+        dist = Distribution({'srcdir': self.srcdir, 'scss_files': {'outfile.css': ['sources/infile.scss']}})
+        cmd = build_scss(dist)
+        cmd.build_lib = self.tmp_dir
+        cmd.ensure_finalized()
+        cmd.run()
+
+        outfile = os.path.join(self.tmp_dir, 'outfile.css')
+        self.assertIn('body-color:#fff', open(outfile).read())
+
     def test_build_scss_no_files(self):
         dist = Distribution({'srcdir': self.srcdir})
         cmd = build_scss(dist)
