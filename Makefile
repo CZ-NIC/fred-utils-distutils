@@ -1,15 +1,16 @@
 APP = freddist
 
-.PHONY: default test isort check-isort check-flake8
+.PHONY: default test isort check-isort check-flake8 check-all
 
-default:
-	echo "No default action, specify the target"
+default: check-all
 
 test:
 	python -m unittest discover
 
 isort:
 	isort --recursive ${APP}
+
+check-all: check-isort check-flake8
 
 check-isort:
 	isort --recursive --check-only --diff ${APP}
