@@ -1,9 +1,12 @@
 APP = freddist
 
-.PHONY: default isort check-isort check-flake8
+.PHONY: default test isort check-isort check-flake8
 
 default:
 	echo "No default action, specify the target"
+
+test:
+	python -m unittest discover
 
 isort:
 	isort --recursive ${APP}

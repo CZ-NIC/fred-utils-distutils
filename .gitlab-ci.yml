@@ -8,3 +8,10 @@ isort:
 flake8:
     image: cznic/ubuntu_python_runner:latest
     script: "make check-flake8"
+
+test:
+    image: cznic/ubuntu_python_runner:latest
+    script:
+        - pip install --find-links=/usr/share/python-wheels -r requirements.txt
+        - pip list
+        - make test
