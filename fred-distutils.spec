@@ -2,6 +2,7 @@
 # values for 'version' and 'unmangled_version' must be provided from outside
 %define release 1
 %global __os_install_post %(echo '%{__os_install_post}' | sed -e 's!/usr/lib[^[:space:]]*/brp-python-bytecompile[[:space:]].*$!!g')
+%define debug_package %{nil}
 
 Summary: Fred Distutils
 Name: %{name}
