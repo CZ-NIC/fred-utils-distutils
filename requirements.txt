@@ -1,1 +1,1 @@
-pyScss
+pyScss >=1.3
