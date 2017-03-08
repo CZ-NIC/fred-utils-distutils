@@ -22,6 +22,6 @@ test:
     image: cznic/ubuntu_python_runner:latest
     stage: test
     script:
-        - pip install --find-links=/usr/share/python-wheels -r requirements.txt
+        - pip install -r requirements.txt
         - pip list
         - make test
