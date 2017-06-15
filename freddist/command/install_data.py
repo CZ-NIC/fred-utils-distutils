@@ -17,6 +17,7 @@ class install_data(_install_data):
 
     To change replacements, pass options to `install` command.
     """
+
     # TODO: Is it possible to use install_data on its own with all replacements?
     # Do not be confused, it is not easy to do so.
     user_options = _install_data.user_options + [
@@ -45,9 +46,7 @@ class install_data(_install_data):
         self._expand_data_files()
 
     def _expand_data_files(self):
-        """
-        Expand variables in destination directories and joins source paths with source directory.
-        """
+        """Expand variables in destination directories and joins source paths with source directory."""
         data_files = []
         for f in self.data_files:
             if type(f) is StringType:
@@ -67,9 +66,7 @@ class install_data(_install_data):
         return new_filename
 
     def skip_sysconf_file(self, src, dest):
-        """
-        Requires confirmation to overwrite the file
-        """
+        """Require confirmation to overwrite the file."""
         # Force overwrite:
         if self.force or self.distribution.command_obj.get("bdist"):
             return False
@@ -102,9 +99,7 @@ class install_data(_install_data):
                 check_call(["diff", src, destpath])
 
     def copy_file(self, infile, outfile, preserve_mode=1, preserve_times=1, link=None, level=1):
-        """
-        Prompt for action on configuration files.
-        """
+        """Prompt for action on configuration files."""
         if outfile.startswith(self.sysconf_dir) and self.skip_sysconf_file(infile, outfile):
             # Return proper result: target filename and 'copied' flag
             return os.path.join(outfile, os.path.basename(infile)), 0

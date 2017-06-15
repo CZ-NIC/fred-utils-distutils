@@ -1,8 +1,4 @@
-"""
-freddist.command.uninstall
-
-Implements the freddist 'uninstall' command.
-"""
+"""Implements the freddist 'uninstall' command."""
 # There is no uninstall command in classic distutils, so we added it.
 # Command class is pretty simple. Uninstall expect `install.log' file in
 # directory from which is executed. Or you can use `--record' option to set

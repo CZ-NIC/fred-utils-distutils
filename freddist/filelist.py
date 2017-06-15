@@ -1,4 +1,5 @@
-"""distutils.filelist
+"""
+Module for distutils.filelist.
 
 Provides the FileList class, used for poking about the filesystem
 and building lists of files.
@@ -8,9 +9,7 @@ from distutils.filelist import FileList as _FileList, findall as _findall
 
 
 def _strip_directory(filename, directory):
-    """
-    Strips directory from filename, if file is in directory or its subdirectories.
-    """
+    """Strip directory from filename, if file is in directory or its subdirectories."""
     filename = os.path.normpath(filename)
     directory = os.path.normpath(directory)
     if filename.startswith(directory):
@@ -20,9 +19,8 @@ def _strip_directory(filename, directory):
 
 
 class FileList(_FileList):
-    """
-    A list of filenames relative to source directory.
-    """
+    """A list of filenames relative to source directory."""
+
     def __init__(self,
                  warn=None,
                  debug_print=None,
@@ -49,7 +47,7 @@ class FileList(_FileList):
 
 def findall(dir=os.curdir):
     """
-    Finds all files under 'dir' and returns the list of full filenames (relative to 'dir').
+    Find all files under 'dir' and return the list of full filenames (relative to 'dir').
 
     Fix distutils version and really returns relative paths.
     """

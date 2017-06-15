@@ -5,12 +5,13 @@ from distutils.errors import DistutilsModuleError
 
 class Distribution(_Distribution):
     """
-    Extra arguments for setup() function:
+    Add extra arguments for setup() function.
 
      * modify_files
      * i18n_files - list of gettext text files to be compiled and distributed (like included in package_data).
      * scss_files - a dictionary of SCSS files - keys are CSS output files, values are lists of SCSS input files
     """
+
     def __init__(self, attrs=None):
         self.srcdir = os.path.normpath(attrs['srcdir'])
         self.rundir = attrs.get('rundir', os.getcwd())
@@ -26,9 +27,7 @@ class Distribution(_Distribution):
         _Distribution.__init__(self, attrs)
 
     def print_commands(self):
-        """
-        Fills register with commands before help is printed.
-        """
+        """Fill register with commands before help is printed."""
         import freddist.command
         # try to load all commands from freddist
         for cmd_name in freddist.command.__all__:
@@ -47,9 +46,7 @@ class Distribution(_Distribution):
         return pkgs
 
     def find_config_files(self):
-        """
-        Searches for additional `setup.cfg` file in source directory.
-        """
+        """Search for additional `setup.cfg` file in source directory."""
         files = _Distribution.find_config_files(self)
         # Handle source-directory setup.cfg
         local_file = "setup.cfg"

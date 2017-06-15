@@ -54,7 +54,9 @@ class sdist(_sdist):
         self.make_distribution()
 
     def add_defaults(self):
-        """Add all the default files to self.filelist:
+        """Add all the default files to self.filelist.
+
+        Added files are:
           - README or README.txt
           - setup.py
           - test/test*.py
@@ -156,8 +158,9 @@ class sdist(_sdist):
             self.filelist.extend(build_scss.get_source_files())
 
     def make_release_tree(self, base_dir, files):
-        """Create the directory tree that will become the source
-        distribution archive.  All directories implied by the filenames in
+        """Create the directory tree that will become the source distribution archive.
+
+        All directories implied by the filenames in
         'files' are created under 'base_dir', and then we hard link or copy
         (if hard linking is unavailable) those files into place.
         Essentially, this duplicates the developer's source tree, but in a
@@ -201,9 +204,7 @@ class sdist(_sdist):
 
     # FREDDIST: new method
     def generate_manifest_in(self, initial=None):
-        """
-        This function generage file MANIFEST.in from distribution.data_files array.
-        """
+        """Generate file MANIFEST.in from distribution.data_files array."""
         manifest = ['# created by:$ python setup.py sdist --create-manifest-in']
 
         # include individual variables

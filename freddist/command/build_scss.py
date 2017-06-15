@@ -1,6 +1,4 @@
-"""distutils.command.build_scss
-
-Implements the Distutils 'build_scss' command."""
+"""Implements the Distutils 'build_scss' command."""
 import os
 from distutils.core import Command
 from distutils.util import convert_path
@@ -32,9 +30,7 @@ class build_scss(Command):
         self.scss_files = self.distribution.scss_files
 
     def get_source_files(self):
-        """
-        Returns list of source files under management of this command.
-        """
+        """Return list of source files under management of this command."""
         if not self.scss_files:
             return []
 
@@ -47,9 +43,7 @@ class build_scss(Command):
         self.scss_compile()
 
     def get_outputs(self):
-        """
-        Returns list of files under build directory under management of this command.
-        """
+        """Return list of files under build directory under management of this command."""
         if not self.scss_files:
             return []
 
@@ -60,9 +54,7 @@ class build_scss(Command):
         return outputs
 
     def scss_compile(self):
-        """
-        Compiles files to build directory.
-        """
+        """Compile files to build directory."""
         scss_files = {}
         for output, inputs in self.scss_files.items():
             outfile = os.path.join(self.build_lib, convert_path(output))

@@ -1,4 +1,5 @@
-"""distutils.util
+"""
+Module for distutils.util.
 
 Miscellaneous utility functions -- anything that doesn't fit into
 one of the other *util.py modules.
@@ -22,9 +23,7 @@ except ImportError:
 
 
 def check_call(*args, **kwargs):
-    """
-    Returns whether call was successful.
-    """
+    """Return whether call was successful."""
     try:
         _check_call(*args, **kwargs)
     except CalledProcessError, error:
@@ -35,9 +34,7 @@ def check_call(*args, **kwargs):
 
 
 def i18n_compile(i18n_files, force=0, dry_run=0):
-    """
-    Byte-compile i18n files.
-    """
+    """Byte-compile i18n files."""
     # nothing is done if sys.dont_write_bytecode is True
     if sys.dont_write_bytecode:
         raise DistutilsByteCompileError('byte-compiling is disabled.')
@@ -59,9 +56,7 @@ def i18n_compile(i18n_files, force=0, dry_run=0):
 
 
 def scss_compile(scss_files, srcdir=None, force=0, dry_run=0):
-    """
-    Compile SCSS files.
-    """
+    """Compile SCSS files."""
     for output, inputs in scss_files.items():
         cmd = ['pyscss', '--output', output]
         if srcdir:
@@ -82,7 +77,7 @@ def scss_compile(scss_files, srcdir=None, force=0, dry_run=0):
 # Copied from setuptools
 def find_packages(where='.', exclude=()):
     """
-    Return a list all Python packages found within directory 'where'
+    Return a list all Python packages found within directory 'where'.
 
     'where' should be supplied as a "cross-platform" (i.e. URL-style) path; it
     will be converted to the appropriate local path syntax.  'exclude' is a
@@ -107,7 +102,7 @@ def find_packages(where='.', exclude=()):
 
 def find_data_files(srcdir, path='.'):
     """
-    Finds all files at given location and returns data-files style list.
+    Find all files at given location and return data-files style list.
 
     Target directories are relative to path, source files are relative to source directory.
     """

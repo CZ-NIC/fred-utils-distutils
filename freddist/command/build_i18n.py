@@ -1,6 +1,4 @@
-"""distutils.command.build_i18n
-
-Implements the Distutils 'build_i18n' command."""
+"""Implements the Distutils 'build_i18n' command."""
 import os
 import sys
 from distutils.core import Command
@@ -37,9 +35,7 @@ class build_i18n(Command):
         self.i18n_files = self.distribution.i18n_files
 
     def get_source_files(self):
-        """
-        Returns list of source files under management of this command.
-        """
+        """Return list of source files under management of this command."""
         return self.i18n_files
 
     def run(self):
@@ -50,9 +46,7 @@ class build_i18n(Command):
         self.i18n_compile()
 
     def get_outputs(self, include_bytecode=True):
-        """
-        Returns list of files under build directory under management of this command.
-        """
+        """Return list of files under build directory under management of this command."""
         outputs = []
         for filename in self.i18n_files:
             outfile = os.path.join(self.build_lib, filename)
@@ -63,9 +57,7 @@ class build_i18n(Command):
         return outputs
 
     def build_i18n_files(self):
-        """
-        Copy and compile gettext files to build directory.
-        """
+        """Copy and compile gettext files to build directory."""
         for filename in self.i18n_files:
             filename = convert_path(filename)
             srcfile = os.path.join(self.distribution.srcdir, filename)
@@ -74,9 +66,7 @@ class build_i18n(Command):
             self.copy_file(srcfile, outfile, preserve_mode=0)
 
     def i18n_compile(self):
-        """
-        Compiles files inside of build directory.
-        """
+        """Compile files inside of build directory."""
         if sys.dont_write_bytecode:
             self.warn('byte-compiling is disabled, skipping.')
             return

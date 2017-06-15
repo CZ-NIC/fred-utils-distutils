@@ -1,6 +1,4 @@
-"""
-This module extends distutils.install by new functrions and features .
-"""
+"""This module extends distutils.install by new functrions and features ."""
 import os
 import re
 import sys
@@ -138,9 +136,7 @@ class install(_install):
                             'sysconf': self.install_sysconf}
 
     def run(self):
-        """
-        Run install process
-        """
+        """Run install process."""
         if self.no_check_deps is None:
             self.check_dependencies()
         _install.run(self)
@@ -156,14 +152,12 @@ class install(_install):
                 self.warn("Modified file '%s' not found." % filename)
 
     def expand_filename(self, filename):
-        """
-        Expands parametrized filename.
-        """
+        """Expand parametrized filename."""
         return subst_vars(filename, self.config_dirs)
 
     # ===== Dependency checks ==========================================================================================
     def get_help4dist(self):
-        "Get help depends on distribution"
+        """Get help depends on distribution."""
         # set the distribution depended help
         dist, help_text = None, {}
         if self.DEPS_HELP is None:
@@ -177,7 +171,7 @@ class install(_install):
         return dist, help_text
 
     def __check_import_module(self, module_name):
-        "Check module by import"
+        """Check module by import."""
         try:
             module = __import__(module_name)
         except ImportError:
@@ -186,7 +180,7 @@ class install(_install):
         return module
 
     def __grab_module_version(self, module, attr_name):
-        "Grab version of module using attr_name or some common names"
+        """Grab version of module using attr_name or some common names."""
         module_version = None
         # load version from user defined attribute/function name or try some
         # common names of function/attribute holding version number
@@ -202,7 +196,7 @@ class install(_install):
         return str(module_version)
 
     def __parse_compare_version(self, compare_version):
-        "Parse compare signs and version number from text"
+        """Parse compare signs and version number from text."""
         # compare_version: '>= 1.2' or '1.2.0'
         compare, version = "=", compare_version
         # compare_version: '>= 1.2' -> ('>=', '1.2')
@@ -212,14 +206,14 @@ class install(_install):
         return compare, version
 
     def __check_command_version(self, module_name, compare_version, command):
-        "Check command version"
+        """Check command version."""
         module_version = os.popen(command).read().strip()
         self.__do_version_comparation(module_name,
                                       module_version, compare_version)
 
     def __check_module_version(self, module, module_name, version_func,
                                compare_version):
-        "Check module version"
+        """Check module version."""
         # Actual installed module version
         module_version = self.__grab_module_version(module, version_func)
         if module_version is None:
@@ -232,7 +226,7 @@ class install(_install):
 
     def __do_version_comparation(self, module_name, module_version,
                                  compare_version):
-        "Do version comparation"
+        """Do version comparation."""
         # parse version
         compare, version = self.__parse_compare_version(compare_version)
 
@@ -259,7 +253,7 @@ class install(_install):
             )
 
     def check_mymodules(self):
-        "Check mypthon modules. Save missing names into self.__missing_modules"
+        """Check mypthon modules. Save missing names into self.__missing_modules."""
         if self.DEPS_PYMODULE is None:
             return  # no any python modules dependencies
         for item in self.DEPS_PYMODULE:
@@ -281,9 +275,7 @@ class install(_install):
                                             compare_version)
 
     def check_commands(self):
-        """Check shell commands. Use 'which command'.
-        Save missing names into self.__missing_modules.
-        """
+        """Check shell commands. Use 'which command'. Save missing names into self.__missing_modules."""
         if self.DEPS_COMMAND is None:
             return  # no any command dependencies
         for command in self.DEPS_COMMAND:
@@ -294,7 +286,7 @@ class install(_install):
                 self.__check_command_version(command, compare_version, cmd)
 
     def check_dependencies(self):
-        'Check application dependencies'
+        """Check application dependencies."""
         self.__missing_modules = []
 
         # check python modules

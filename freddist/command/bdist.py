@@ -2,8 +2,7 @@ from distutils.command.bdist import bdist as _bdist
 
 
 def show_formats():
-    """Print list of available formats (arguments to "--format" option).
-    """
+    """Print list of available formats (arguments to "--format" option)."""
     from distutils.fancy_getopt import FancyGetopt
     formats = []
     for fmt in bdist.format_commands:

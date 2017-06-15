@@ -50,9 +50,7 @@ class bdist_rpm(_bdist_rpm):
         _bdist_rpm.finalize_options(self)
 
     def _make_spec_file(self):
-        """
-        Changes default build and install scripts.
-        """
+        """Change default build and install scripts."""
         def_setup_call = "%s %s" % (self.python, os.path.basename(sys.argv[0]))
 
         if not self.build_script:
