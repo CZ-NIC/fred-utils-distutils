@@ -6,7 +6,6 @@ from distutils.command.install import install as _install
 from distutils.util import change_root, convert_path, subst_vars
 from distutils.version import LooseVersion
 
-
 # Difference between freddist.install and distutils.install class isn't wide.
 # Only new options were added. Most of them are output directory related.
 # These are used so far by freddist.install_data class.
