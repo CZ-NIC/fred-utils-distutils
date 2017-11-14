@@ -32,7 +32,7 @@ class uninstall(Command):
             os.rmdir(tree)
             if self.rmtree(os.path.dirname(tree)) == 1:
                 return 1
-        except:
+        except OSError:
             return 1
         return 0
 
@@ -49,7 +49,7 @@ class uninstall(Command):
         print "uninstall"
         try:
             body = open(self.record).readlines()
-        except:
+        except IOError:
             print "can not open file %s" % self.record
             exit()
 

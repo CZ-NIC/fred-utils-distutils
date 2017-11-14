@@ -57,7 +57,7 @@ def call_git_describe(srcdir=None, abbrev=4):
         else:
             line = popen.stdout.readlines()[0]
         return line.strip()
-    except:
+    except Exception:
         return None
 
 
@@ -75,7 +75,7 @@ def read_release_version(srcdir=None):
         finally:
             file_obj.close()
 
-    except:
+    except Exception:
         return None
 
 
