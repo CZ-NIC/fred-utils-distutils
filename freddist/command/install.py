@@ -199,7 +199,7 @@ class install(_install):
         # compare_version: '>= 1.2' or '1.2.0'
         compare, version = "=", compare_version
         # compare_version: '>= 1.2' -> ('>=', '1.2')
-        match = re.match('\s*([><=]+)\s*(.+)', compare_version)
+        match = re.match(r'\s*([><=]+)\s*(.+)', compare_version)
         if match:
             compare, version = match.groups()
         return compare, version
@@ -259,12 +259,12 @@ class install(_install):
             # item: "django"
             module_name, version_func, compare_version = item, None, None
             # item: "django VERSION(>= 1.2)" -> 'django', 'VERSION', '>= 1.2')
-            match = re.match('(\w+)\s+(\w+)\((.+?)\)', item)
+            match = re.match(r'(\w+)\s+(\w+)\((.+?)\)', item)
             if match:
                 module_name, version_func, compare_version = match.groups()
             else:
                 # item: "django (>= 1.2)" -> ('django', '>= 1.2')
-                match = re.match('(\w+)\s+\((.+?)\)', item)
+                match = re.match(r'(\w+)\s+\((.+?)\)', item)
                 if match:
                     module_name, compare_version = match.groups()
 
