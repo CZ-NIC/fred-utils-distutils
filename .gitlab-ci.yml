@@ -36,6 +36,14 @@ isort:
         - pip list
     script: "make check-isort"
 
+licensing:
+    <<: *python2-xenial
+    stage: analysis
+    before_script:
+        - git clone git@gitlab.office.nic.cz:internal-tools/license-check.git --single-branch --depth 1
+    script:
+        - ./license-check/license-check.sh -v
+
 flake8:
     <<: *requires-python
     <<: *python2-xenial
