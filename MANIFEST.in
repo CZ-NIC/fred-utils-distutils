@@ -1,2 +1,4 @@
 include MANIFEST.in
 include fred-distutils.spec
+include COPYING
+include LICENSE
